@@ -3,15 +3,13 @@ from flask import Flask, render_template
 from flask_login import LoginManager, current_user
 from models import User, db
 from views import views
+from config import Config
 
 # Create Flask Instance
 app = Flask(__name__)
 
 # Add Database
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:password@localhost:5432/tastelab"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-# Secret Key
-app.config["SECRET_KEY"] = "tastelab"
+app.config.from_object(Config)
 
 # Initialize the database with app
 db.init_app(app)
