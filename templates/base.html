@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{{ url_for('static', filename='images/buas.gif') }}" rel="icon">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+    <!-- CSS Links -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+
+    <!-- Remove redundant Chartist CSS links -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
+    {% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    {% endblock %}
+
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <img src="{{ url_for('static', filename='images/buas.gif') }}" alt="Logo" width="40" height="40" class="d-inline-block align-text-top">
+            </a>
+            <a class="navbar-brand fw-bold" href="/">TasteLab</a>
+
+            <!-- Search Bar (Desktop) -->
+            <!-- <div class="search-container d-none d-lg-block mx-auto">
+                <form role="search" id="searchForm">
+                    <input class="search-input" type="search" placeholder="Search experiments, participants, data..." aria-label="Search" id="searchInput">
+                    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                </form>
+            </div>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button> -->
+
+            <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
+                <!-- Mobile Search Bar -->
+                <!-- <div class="search-container d-lg-none mt-2 mb-2">
+                    <form role="search" id="searchFormMobile">
+                        <input class="search-input" type="search" placeholder="Search..." aria-label="Search">
+                        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                    </form>
+                </div> -->
+
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16,17 21,12 16,7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                            Logout
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1">
+                                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                                <polyline points="10,17 15,12 10,7"></polyline>
+                                <line x1="15" y1="12" x2="3" y2="12"></line>
+                            </svg>
+                            Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/sign-up">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <line x1="19" y1="8" x2="19" y2="14"></line>
+                                <line x1="22" y1="11" x2="16" y2="11"></line>
+                            </svg>
+                            Sign Up
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash messages -->
+    <div class="flash-message">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category == 'error' %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="content">   
+        <!-- Sidebar -->
+        {% if user.is_authenticated %}
+        <div class="container-fluid">
+            <div class="row">
+                <nav id="sidebar" class="col-md-2 col-lg-1 d-none d-md-block sidebar">
+                    <div class="position-fixed sidebar-nav">
+
+                        <!-- Sidebar Header -->
+                        <div class="sidebar-header">
+                            <h6>Taste Lab Dashboard</h6>
+                        </div><br/>
+                        
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link" id="dashboard" href="/">
+                                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="9" y1="9" x2="9" y2="9"></line>
+                                        <line x1="15" y1="9" x2="15" y2="9"></line>
+                                        <line x1="9" y1="15" x2="15" y2="15"></line>
+                                    </svg>
+                                    Dashboard
+                                </a>
+                            </li>
+
+                            <div class="sidebar-divider"></div>
+                            
+                            <li class="nav-item">
+                                <a class="nav-link" id="experiments" href="/experiments">
+                                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                                        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                                    </svg>
+                                    Experiments
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" id="transcription" href="/transcription">
+                                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <polyline points="14,2 14,8 20,8"></polyline>
+                                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                                        <polyline points="10,9 9,9 8,9"></polyline>
+                                    </svg>
+                                    Transcription
+                                </a>
+                            </li>
+
+                            <div class="sidebar-divider"></div>
+
+                            <li class="nav-item">
+                                <a class="nav-link" id="detection-tracking" href="/detection-tracking">
+                                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="14.31" y1="8" x2="20.05" y2="17.94"/>
+                                        <line x1="9.69" y1="8" x2="21.17" y2="8"/>
+                                        <line x1="7.38" y1="12" x2="13.12" y2="2.06"/>
+                                        <line x1="9.69" y1="16" x2="3.95" y2="6.06"/>
+                                        <line x1="14.31" y1="16" x2="2.83" y2="16"/>
+                                        <line x1="16.62" y1="12" x2="10.88" y2="21.94"/>
+                                    </svg>
+                                    Detection & Tracking
+                                </a>
+                            </li>                               
+                            <li class="nav-item">
+                                <a class="nav-link" id="analytics" href="/analytics">
+                                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"></polyline>
+                                    </svg>
+                                    Analytics
+                                </a>
+                            </li>
+                            
+                            <div class="sidebar-divider"></div>
+
+                            <li class="nav-item">
+                                <a class="nav-link" id="profile" href="/profile">
+                                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                    Profile
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" id="help" href="/help">
+                                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                    </svg>
+                                    Help
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </div>
+        {% endif %}
+                <main class="col-md-10 ms-sm-auto col-lg-11 ps-md-4 main-content">
+                    {% block content %}
+                    {% endblock %}
+                </main>
+    </div>
+    <!-- Footer -->
+    <footer class="bg-light text-center text-lg-start mt-auto">
+        <div class="container p-4">
+            <div class="row">
+                <div class="col-lg-12 col-md-12 mb-4 mb-md-0">
+                    <ul class="list-inline">
+                        <li class="list-inline-item">
+                            <a href="/privacy-policy">Privacy Policy</a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a href="/terms-of-service">Terms of Service</a>
+                        </li>
+                        <p>&copy; 2025 Taste Lab. All rights reserved.</p>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+ <!-- Chartist -->
+    <script src="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+    <script src="bower_components/chartist/dist/chartist.min.js"></script>
+    <script src="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
+
+<!-- Bootstrap Java Script Links-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+<!-- Apex Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <script>           
+            // Active sidebar navigation
+            var currentPath = window.location.pathname;
+            $('.sidebar .nav-link').removeClass('active');
+
+            // Match current page to sidebar links
+            if (currentPath === '/' || currentPath === '/dashboard') {
+                $('#dashboard').addClass('active');
+            } else if (currentPath === '/experiments') {
+                $('#experiments').addClass('active');
+            } else if (currentPath === '/transcription') {
+                $('#transcription').addClass('active');
+            } else if (currentPath === '/detection-tracking') {
+                $('#detection-tracking').addClass('active');
+            } else if (currentPath === '/analytics') {
+                $('#analytics').addClass('active');
+            } else if (currentPath === '/profile') {
+                $('#profile').addClass('active');
+            } else if (currentPath === '/help') {
+                $('#help').addClass('active');
+            }
+    </script>
+
+</body>
+</html>

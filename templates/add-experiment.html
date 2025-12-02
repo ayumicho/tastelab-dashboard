@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}
+Add Experiment
+{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/experiments.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="profile-container">
+        <div class="header">
+            <div>
+                <h1 class="header-title">Add New Experiment</h1>
+                <p class="header-subtitle">Fill in the details below to create a new experiment.</p>
+            </div>
+            <button type="button" class="btn-close" onclick="location.href='/experiments'" aria-label="Close"></button>
+        </div>
+        <div class="main-card">
+            <div class="container-fluid">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Experiment Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="participants" class="form-label">Participants</label>
+                        <input type="number" class="form-control" id="participants" name="participants" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="duration" class="form-label">Duration (minutes)</label>
+                        <input type="number" class="form-control" id="duration" name="duration" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="date" name="date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tags" class="form-label">Tags (comma separated)</label>
+                        <input type="text" class="form-control" id="tags" name="tags">
+                    </div>
+                    <div class="mb-3">
+                        <label for="datafile" class="form-label">Upload Data File</label>
+                        <input class="form-control" type="file" id="datafile" name="datafile">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Experiment</button>
+                    <button type="button" class="btn btn-cancel" onclick="location.href='/experiments'">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>    
+{% endblock %}

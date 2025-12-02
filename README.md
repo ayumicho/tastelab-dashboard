@@ -90,14 +90,14 @@ Ensure you have the following installed:
 ## Project Structure
 
 ```
-/Dashboard/
+tastelab-dashboard/
 ├── templates/                     # HTML templates
 │   ├── 404.html                   # Error page
 │   ├── 500.html                   # Server error page
-│   ├── add-experiment.html        # Experiment-related templates
+│   ├── add-experiment.html        # Add experiment page
 │   ├── base.html                  # Base template
 │   ├── cv.html                    # Showcases data from CV model
-│   ├── experiments/               # Experiment-related templates
+│   ├── experiments.html           # Shows list of experiments
 │   ├── help.html                  # Help page
 │   ├── home.html                  # Dashboard home
 │   ├── login.html                 # Login page
@@ -105,9 +105,9 @@ Ensure you have the following installed:
 │   ├── privacy-policy.html        # Privacy Policy page
 │   ├── profile.html               # User profile
 │   ├── signup.html                # Registration page
-│   ├── single-experiment.html     # Experiment-related templates
+│   ├── single-experiment.html     # Shows details of a single experiment
 │   ├── terms-of-service.html      # Terms of Service page
-│   └── nlp/                       # Showcases data from NLP model
+│   └── nlp.html                   # Showcases data from NLP model
 ├── static/                        # Static assets
 │   ├── css/                       # Stylesheets
 │   ├── js/                        # JavaScript files

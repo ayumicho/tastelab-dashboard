@@ -1,0 +1,606 @@
+{% extends "base.html" %}
+
+{% block title %}Experiment Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid pt-4">
+    <div class="header">
+        <div>
+            <h1 class="header-title">Welcome {{ user.first_name }}</h1>
+            <p class="header-subtitle">Analyzing collected data from sensory experiments</p>
+        </div>
+    </div>
+
+    <div class="main-card">
+        <!-- Experiment Selector (Shows ALL experiments, with or without analysis) -->
+        <div class="experiment-selector">
+            <div class="selector-header">
+                <span class="selector-title">Select Experiment to View</span>
+            </div>
+            <div class="experiment-dropdown">
+                <select class="form-control experiment-select" id="experimentSelect">
+                    {% if experiments %}
+                        {% for exp in experiments %}
+                            <option value="{{ exp.id }}" {% if selected_experiment and selected_experiment.id == exp.id %}selected{% endif %}>
+                                {{ exp.title }} ({{ exp.date.strftime('%b %d, %Y') }})
+                                {% if exp.analysis %} ✓ Analyzed{% endif %}
+                            </option>
+                        {% endfor %}
+                    {% else %}
+                        <option value="">No experiments available</option>
+                    {% endif %}
+                </select>
+                <button class="btn btn-primary" id="compareBtn">Compare Experiments</button>
+                <button class="btn btn-success" id="exportBtn">Export Data</button>
+            </div>
+        </div>
+
+        <!-- Quick Insights Row -->
+        <div class="insight-cards">
+            <div class="insight-card">
+                <div class="insight-label">Total Experiments</div>
+                <div class="insight-value">{{ stats.total_experiments }}</div>
+                <div class="insight-change">recorded experiments</div>
+            </div>
+            <div class="insight-card">
+                <div class="insight-label">With Analysis</div>
+                <div class="insight-value">{{ stats.experiments_with_analysis }}</div>
+                <div class="insight-change">emotion analyses</div>
+            </div>
+            <div class="insight-card">
+                <div class="insight-label">Total Segments</div>
+                <div class="insight-value">{{ stats.total_segments or 0 }}</div>
+                <div class="insight-change">analyzed segments</div>
+            </div>
+        </div>
+
+        {% if selected_experiment %}
+        <!-- Experiment Overview Card -->
+        <div class="content-card py-4">
+            <div id="experimentBanner">
+                <div class="banner-content">
+                    <div class="banner-main">
+                        <div class="experiment-name">
+                            {{ selected_experiment.title }}
+                            {% if analysis %}
+                                <span style="display: inline-block; padding: 0.25rem 0.75rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 12px; font-size: 0.75rem; font-weight: 600; margin-left: 0.5rem;">
+                                    ✓ Emotion Analysis Available
+                                </span>
+                            {% endif %}
+                        </div>
+                        {% if selected_experiment.description %}
+                        <div class="experiment-description">
+                            {{ selected_experiment.description }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-header">
+                <h2 class="card-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="20" x2="12" y2="10"></line>
+                        <line x1="18" y1="20" x2="18" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="16"></line>
+                    </svg>
+                    Experiment Details
+                </h2>
+            </div>
+
+            <!-- Experiment Metadata -->
+            <div class="row">
+                <div class="col-md-3 mb-4">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </div>
+                        <div class="stat-value">{{ selected_experiment.participant_count or 0 }}</div>
+                        <div class="stat-label">Participants</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </div>
+                        <div class="stat-value">{{ selected_experiment.date.strftime('%d') }}</div>
+                        <div class="stat-label">{{ selected_experiment.date.strftime('%B %Y') }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">  
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                        </div>
+                        <div class="stat-value">{{ selected_experiment.format_duration() }}</div>
+                        <div class="stat-label">Duration</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                                <path d="M9 14l2 2 4-4"></path>
+                            </svg>
+                        </div>
+                        <div class="stat-value">{{ selected_experiment.status }}</div>
+                        <div class="stat-label">Status</div>
+                    </div>
+                </div>    
+            </div>
+
+            {% if selected_experiment.tags %}
+            <div class="tags-section" style="margin-top: 1rem;">
+                <strong>Tags:</strong>
+                {% for tag in selected_experiment.tags.split(',') %}
+                    <span class="tag-badge">{{ tag.strip() }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Emotion Analysis Section (Only if analysis data exists) -->
+        {% if analysis %}
+        <div class="content-card py-4">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                        <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                        <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                    </svg>
+                    Emotion Analysis Results
+                </h2>
+                <a href="{{ url_for('views.transcription', id=selected_experiment.id) }}" class="btn btn-secondary">
+                    View Full Analysis →
+                </a>
+            </div>
+
+            <!-- Analysis Quick Stats -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <div class="stat-value">{{ analysis.dominant_emotion|title }}</div>
+                        <div class="stat-label" style="color: rgba(255,255,255,0.9);">Dominant Emotion</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-value">{{ analysis.total_segments or 0 }}</div>
+                        <div class="stat-label">Total Segments</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-value">{{ analysis.word_count or 0 }}</div>
+                        <div class="stat-label">Words Analyzed</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-value">{{ "%.1f"|format(analysis.reading_time_minutes or 0) }} min</div>
+                        <div class="stat-label">Reading Time</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emotion Distribution -->
+            {% if analysis.emotion_summary and analysis.emotion_summary.emotion_percentages %}
+            <div class="row">
+                <div class="col-md-8">
+                    <h5 style="margin-bottom: 1rem; color: #2d3748;">Emotion Distribution</h5>
+                    <div class="row">
+                        {% for emotion, percentage in analysis.emotion_summary.emotion_percentages.items() %}
+                        <div class="col-md-6 mb-3">
+                            <div style="padding: 0.75rem; background: #f7fafc; border-radius: 8px;">
+                                <div style="font-weight: 600; color: #2d3748; margin-bottom: 0.5rem;">{{ emotion|title }}</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: #667eea; margin-bottom: 0.5rem;">{{ "%.1f"|format(percentage) }}%</div>
+                                <div style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                                    <div style="height: 100%; width: {{ percentage }}%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); transition: width 0.3s ease;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h5 style="margin-bottom: 1rem; color: #2d3748;">Emotion Breakdown</h5>
+                    <div style="height: 300px;">
+                        <canvas id="emotionPieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Additional Analysis Info -->
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div style="padding: 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 12px; text-align: center;">
+                        <h6 style="margin-bottom: 0.5rem; opacity: 0.9;">Questions Detected</h6>
+                        <p style="font-size: 2rem; font-weight: 700; margin: 0;">{{ analysis.questions.count() }}</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div style="padding: 1.5rem; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border-radius: 12px; text-align: center;">
+                        <h6 style="margin-bottom: 0.5rem; opacity: 0.9;">Action Items</h6>
+                        <p style="font-size: 2rem; font-weight: 700; margin: 0;">{{ analysis.actions.count() }}</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div style="padding: 1.5rem; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; border-radius: 12px; text-align: center;">
+                        <h6 style="margin-bottom: 0.5rem; opacity: 0.9;">Keywords</h6>
+                        <p style="font-size: 2rem; font-weight: 700; margin: 0;">{{ analysis.keywords.count() }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <!-- No Analysis Available Message -->
+        <div class="content-card">
+            <div class="text-center py-4" style="background: #f7fafc; border-radius: 12px; border: 2px dashed #cbd5e0;">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #a0aec0; margin-bottom: 1rem;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <h4 style="color: #4a5568; margin-bottom: 0.5rem;">No Emotion Analysis Data</h4>
+                <p style="color: #718096; margin-bottom: 1rem;">Import emotion analysis data from MinIO to see detailed insights for this experiment.</p>
+                <code style="background: #e2e8f0; padding: 0.5rem 1rem; border-radius: 6px; color: #2d3748;">
+                    python connect_minio.py
+                </code>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Charts Row -->
+        <div class="row">
+            <!-- Participant Trends -->
+            <div class="col-md-6 mb-4">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 3v18h18"></path>
+                                <path d="M18 9l-5 5-4-4-3 3"></path>
+                            </svg>
+                            Participant Trends
+                        </h2>
+                    </div>
+                    <div class="mini-chart">
+                        <canvas id="participantChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tag Distribution -->
+            <div class="col-md-6 mb-4">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="2" x2="12" y2="12"></line>
+                                <line x1="12" y1="12" x2="16" y2="16"></line>
+                            </svg>
+                            Experiment Categories
+                        </h2>
+                    </div>
+                    <div class="mini-chart">
+                        <canvas id="tagChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    Quick Actions
+                </h2>
+            </div>
+            <div class="panel">
+                <a href="{{ url_for('views.transcription') }}" class="panel-btn">
+                    <div class="panel-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                        </svg>
+                    </div>
+                    <div class="panel-text">
+                        <div class="panel-title">Emotion Analysis</div>
+                        <div class="panel-desc">View detailed analyses</div>
+                    </div>
+                </a>
+                <a href="{{ url_for('views.experiments') }}" class="panel-btn">
+                    <div class="panel-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 11l3 3L22 4"></path>
+                        </svg>
+                    </div>
+                    <div class="panel-text">
+                        <div class="panel-title">All Experiments</div>
+                        <div class="panel-desc">Browse experiments</div>
+                    </div>
+                </a>
+                <a href="{{ url_for('views.analytics') }}" class="panel-btn">
+                    <div class="panel-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="20" x2="12" y2="10"></line>
+                            <line x1="18" y1="20" x2="18" y2="4"></line>
+                        </svg>
+                    </div>
+                    <div class="panel-text">
+                        <div class="panel-title">Analytics</div>
+                        <div class="panel-desc">View insights</div>
+                    </div>
+                </a>
+                <a href="{{ url_for('views.add_experiment') }}" class="panel-btn">
+                    <div class="panel-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </div>
+                    <div class="panel-text">
+                        <div class="panel-title">New Experiment</div>
+                        <div class="panel-desc">Add new data</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent Activity & Top Performers -->
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            Recent Activity
+                        </h2>
+                    </div>
+                    <div class="activity-feed">
+                        {% for exp in recent_activity %}
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                {% if exp.analysis %}😊{% else %}📊{% endif %}
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">{{ exp.title }}</div>
+                                <div class="activity-meta">
+                                    {{ exp.participant_count or 0 }} participants • {{ exp.format_duration() }}
+                                    {% if exp.analysis %} • Emotion analyzed{% endif %}
+                                </div>
+                                <div class="activity-date">{{ exp.date.strftime('%B %d, %Y') }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path>
+                            </svg>
+                            Top Experiments
+                        </h2>
+                    </div>
+                    <div class="top-experiments-list">
+                        {% for exp in top_experiments %}
+                        <div class="top-experiment-item">
+                            <div class="top-experiment-rank">{{ loop.index }}</div>
+                            <div class="top-experiment-info">
+                                <div class="top-experiment-title">{{ exp.title }}</div>
+                                <div class="top-experiment-meta">{{ exp.date.strftime('%b %d, %Y') }}</div>
+                            </div>
+                            <div class="top-experiment-score">
+                                <div class="top-experiment-value">{{ exp.participant_count or 0 }}</div>
+                                <div class="top-experiment-label">participants</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Statistics -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 3v18h18"></path>
+                        <path d="M18 9l-5 5-4-4-3 3"></path>
+                    </svg>
+                    Overall Statistics
+                </h2>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 col-lg-3 mb-3">
+                    <div class="overall-stat">
+                        <div class="overall-stat-label">Total Experiments</div>
+                        <div class="overall-stat-value">{{ stats.total_experiments }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 mb-3">
+                    <div class="overall-stat">
+                        <div class="overall-stat-label">Total Participants</div>
+                        <div class="overall-stat-value">{{ stats.total_participants }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 mb-3">
+                    <div class="overall-stat">
+                        <div class="overall-stat-label">With Analysis</div>
+                        <div class="overall-stat-value">{{ stats.experiments_with_analysis }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 mb-3">
+                    <div class="overall-stat">
+                        <div class="overall-stat-label">Completed</div>
+                        <div class="overall-stat-value">{{ stats.completed_experiments }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- No experiments message -->
+        <div class="content-card">
+            <div class="text-center py-5">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mx-auto mb-3" style="color: #cbd5e0;">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <h4 style="color: #718096;">No Experiments Available</h4>
+                <p style="color: #a0aec0;">Create your first experiment to get started.</p>
+                <a href="{{ url_for('views.add_experiment') }}" class="btn btn-primary mt-3">Add New Experiment</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+<br/><br/><br/>
+
+<script>
+    // Experiment selector
+    const experimentSelect = document.getElementById('experimentSelect');
+    if (experimentSelect) {
+        experimentSelect.addEventListener('change', function() {
+            const expId = this.value;
+            if (expId) {
+                window.location.href = `/?exp_id=${expId}`;
+            }
+        });
+    }
+
+    // Export and Compare buttons
+    document.getElementById('exportBtn')?.addEventListener('click', () => alert('Export coming soon!'));
+    document.getElementById('compareBtn')?.addEventListener('click', () => alert('Compare coming soon!'));
+
+    // Template data
+    const templateData = {
+        participantTrend: {
+            labels: {{ participant_trend.labels | tojson if participant_trend and participant_trend.labels else '[]' | safe }},
+            data: {{ participant_trend.data | tojson if participant_trend and participant_trend.data else '[]' | safe }}
+        },
+        tagCounts: {{ tag_counts | tojson if tag_counts else '{}' | safe }},
+        {% if analysis and analysis.emotion_summary and analysis.emotion_summary.emotion_percentages %}
+        emotionData: {{ analysis.emotion_summary.emotion_percentages | tojson | safe }}
+        {% else %}
+        emotionData: null
+        {% endif %}
+    };
+
+    // Participant Chart
+    const participantCtx = document.getElementById('participantChart');
+    if (participantCtx && templateData.participantTrend.labels.length > 0) {
+        new Chart(participantCtx, {
+            type: 'line',
+            data: {
+                labels: templateData.participantTrend.labels,
+                datasets: [{
+                    label: 'Participants',
+                    data: templateData.participantTrend.data,
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+            }
+        });
+    }
+
+    // Tag Chart
+    const tagCtx = document.getElementById('tagChart');
+    if (tagCtx && Object.keys(templateData.tagCounts).length > 0) {
+        new Chart(tagCtx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(templateData.tagCounts),
+                datasets: [{
+                    data: Object.values(templateData.tagCounts),
+                    backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    }
+
+    // Emotion Pie Chart
+    const emotionCtx = document.getElementById('emotionPieChart');
+    if (emotionCtx && templateData.emotionData) {
+        const emotionColors = {
+            'happy': '#48bb78', 'sad': '#4299e1', 'angry': '#f56565',
+            'neutral': '#a0aec0', 'fear': '#ed8936', 'surprise': '#f6e05e', 'disgust': '#9f7aea'
+        };
+        
+        const labels = Object.keys(templateData.emotionData);
+        const values = Object.values(templateData.emotionData);
+        const colors = labels.map(l => emotionColors[l.toLowerCase()] || '#a0aec0');
+        
+        new Chart(emotionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: labels.map(l => l.charAt(0).toUpperCase() + l.slice(1)),
+                datasets: [{
+                    data: values,
+                    backgroundColor: colors,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'right' } }
+            }
+        });
+    }
+</script>
+{% endblock %}

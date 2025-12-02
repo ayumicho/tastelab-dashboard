@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% block title %}Sign Up{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/sign-up.css') }}">
+{% endblock %}
+{% block content %}
+<div class="signup-container">
+    <div class="signup-card">
+        <div class="signup-header">
+            <div class="signup-logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+            </div>
+            <h1 class="signup-title">Join TasteLab</h1>
+            <p class="signup-subtitle">Create your researcher account</p>
+        </div>
+
+        <div class="signup-body">
+            <form method="POST" id="signup-form">
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label for="firstName" class="form-label-modern">First Name</label>
+                        <div class="position-relative">
+                            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            <input type="text" class="form-input-modern" id="firstName" name="firstName" placeholder="Enter first name" required />
+                            <div class="validation-message">Please enter your first name</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label for="lastName" class="form-label-modern">Last Name</label>
+                        <div class="position-relative">
+                            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            <input type="text" class="form-input-modern" id="lastName" name="lastName" placeholder="Enter last name" required />
+                            <div class="validation-message">Please enter your last name</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group-modern">
+                    <label for="email" class="form-label-modern">Email Address</label>
+                    <div class="position-relative">
+                        <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                        <input type="email" class="form-input-modern" id="email" name="email" placeholder="Enter your email" required />
+                        <div class="validation-message">Please enter a valid email address</div>
+                    </div>
+                </div>
+
+                <div class="form-group-modern">
+                    <label for="password1" class="form-label-modern">Password</label>
+                    <div class="position-relative">
+                        <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <circle cx="12" cy="16" r="1"></circle>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        <input type="password" class="form-input-modern" id="password1" name="password1" placeholder="Create a strong password" required />
+                        <div class="validation-message">Password must be at least 6 characters</div>
+                    </div>
+                    <div class="password-strength">
+                        <div class="strength-bar">
+                            <div class="strength-fill" id="strength-fill"></div>
+                        </div>
+                        <span id="strength-text">Password strength</span>
+                    </div>
+                </div>
+
+                <div class="form-group-modern">
+                    <label for="password2" class="form-label-modern">Confirm Password</label>
+                    <div class="position-relative">
+                        <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 12l2 2 4-4"></path>
+                            <path d="M21 12c-1.5-1.5-3.5-3-6-3s-4.5 1.5-6 3 3.5 3 6 3 4.5-1.5 6-3z"></path>
+                        </svg>
+                        <input type="password" class="form-input-modern" id="password2" name="password2" placeholder="Confirm your password" required />
+                        <div class="validation-message">Passwords do not match</div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-modern-primary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    Create Account
+                </button>
+            </form>
+        </div>
+
+        <div class="signup-footer">
+            <p>Already have an account? <a href="/login">Sign in here</a></p>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('signup-form');
+    const inputs = document.querySelectorAll('.form-input-modern');
+    const password1 = document.getElementById('password1');
+    const password2 = document.getElementById('password2');
+    const strengthFill = document.getElementById('strength-fill');
+    const strengthText = document.getElementById('strength-text');
+
+    // Real-time validation
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            validateField(this);
+        });
+
+        input.addEventListener('blur', function() {
+            validateField(this);
+        });
+    });
+
+    // Password strength checker
+    password1.addEventListener('input', function() {
+        const strength = checkPasswordStrength(this.value);
+        updatePasswordStrength(strength);
+    });
+
+    // Confirm password matching
+    password2.addEventListener('input', function() {
+        const group = this.closest('.form-group-modern');
+        if (this.value && password1.value !== this.value) {
+            group.classList.add('invalid');
+            group.classList.remove('valid');
+        } else if (this.value && password1.value === this.value) {
+            group.classList.remove('invalid');
+            group.classList.add('valid');
+        }
+    });
+
+    function validateField(field) {
+        const group = field.closest('.form-group-modern');
+        const isValid = field.checkValidity() && field.value.trim() !== '';
+
+        if (field.type === 'email') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const isValidEmail = emailRegex.test(field.value);
+            if (field.value && !isValidEmail) {
+                group.classList.add('invalid');
+                group.classList.remove('valid');
+                return;
+            }
+        }
+
+        if (field.id === 'password1' && field.value.length > 0 && field.value.length < 8) {
+            group.classList.add('invalid');
+            group.classList.remove('valid');
+            return;
+        }
+
+        if (isValid) {
+            group.classList.remove('invalid');
+            group.classList.add('valid');
+        } else if (field.value.length > 0) {
+            group.classList.add('invalid');
+            group.classList.remove('valid');
+        } else {
+            group.classList.remove('invalid', 'valid');
+        }
+    }
+
+    function checkPasswordStrength(password) {
+        let score = 0;
+
+        if (password.length >= 8) score++;
+        if (password.match(/[a-z]/)) score++;
+        if (password.match(/[A-Z]/)) score++;
+        if (password.match(/[0-9]/)) score++;
+        if (password.match(/[^a-zA-Z0-9]/)) score++;
+
+        return score;
+    }
+
+    function updatePasswordStrength(score) {
+        const classes = ['strength-weak', 'strength-fair', 'strength-good', 'strength-strong'];
+        const texts = ['Weak password', 'Fair password', 'Good password', 'Strong password'];
+
+        strengthFill.className = 'strength-fill';
+
+        if (score === 0) {
+            strengthText.textContent = 'Password strength';
+        } else if (score <= 2) {
+            strengthFill.classList.add('strength-weak');
+            strengthText.textContent = texts[0];
+        } else if (score === 3) {
+            strengthFill.classList.add('strength-fair');
+            strengthText.textContent = texts[1];
+        } else if (score === 4) {
+            strengthFill.classList.add('strength-good');
+            strengthText.textContent = texts[2];
+        } else {
+            strengthFill.classList.add('strength-strong');
+            strengthText.textContent = texts[3];
+        }
+    }
+
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+
+        inputs.forEach(input => {
+            if (input.required && !input.value.trim()) {
+                isValid = false;
+                const group = input.closest('.form-group-modern');
+                group.classList.add('invalid');
+            }
+        });
+
+        if (password1.value !== password2.value) {
+            isValid = false;
+            const group = password2.closest('.form-group-modern');
+            group.classList.add('invalid');
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+
+{% endblock %}

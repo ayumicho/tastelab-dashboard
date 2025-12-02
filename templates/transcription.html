@@ -1,0 +1,348 @@
+{% extends "base.html" %}
+
+{% block title %}Emotion Analysis{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/transcription.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid pt-4">
+    <div class="header">
+        <div>
+            <h1 class="header-title">Emotion Analysis</h1>
+            <p class="header-subtitle">Detailed emotion detection and sentiment analysis from experiments</p>
+        </div>
+    </div>
+
+    <div class="main-card">
+        {% if selected_experiment and analysis %}
+        <div class="results-section active" id="resultsSection">
+            <div class="transcription-selector" style="margin-bottom: 2rem;">
+                <select class="form-control" id="experimentSelect" onchange="loadAnalysis(this.value)">
+                    {% for exp in experiments %}
+                    <option value="{{ exp.id }}" {% if exp.id == selected_experiment.id %}selected{% endif %}>
+                        {{ exp.title }} - {{ exp.date.strftime('%Y-%m-%d') }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="video-banner">
+                <div class="banner-content">
+                    <div>
+                        <div class="video-name" id="experimentTitle">{{ selected_experiment.title }}</div>
+                        <div class="video-meta">
+                            Source: <span id="videoSource">{{ analysis.source_filename }}</span>
+                        </div>
+                        <div class="video-meta">
+                            Analyzed: <span id="processedDate">{{ analysis.analyzed_at.strftime('%Y-%m-%d %H:%M:%S') if analysis.analyzed_at else 'N/A' }}</span>
+                        </div>
+                        <div class="video-meta">
+                            Generated: <span>{{ analysis.generated_at.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+                        </div>
+                    </div>
+                    <div class="banner-stats">
+                        <div class="banner-stat">
+                            <div class="banner-stat-value" id="segments">{{ analysis.total_segments }}</div>
+                            <div class="banner-stat-label">Total Segments</div>
+                        </div>
+                        <div class="banner-stat">
+                            <div class="banner-stat-value" id="dominant">{{ analysis.dominant_emotion|title }}</div>
+                            <div class="banner-stat-label">Dominant Emotion</div>
+                        </div>
+                        <div class="banner-stat">
+                            <div class="banner-stat-value" id="timeline">{{ analysis.timeline_segments.count() }}</div>
+                            <div class="banner-stat-label">Timeline Points</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if summary %}
+            <div class="content-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                            <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                            <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                        </svg>
+                        Emotion Distribution
+                    </h2>
+                </div>
+                <div class="row">
+                    {% if summary.emotion_percentages %}
+                        <div class="col-md-8 col-lg-6 mx-auto">
+                            <div style="position: relative; height: 400px;">
+                                <canvas id="emotionDistributionPieChart"></canvas>
+                            </div>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No emotion distribution data available</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h2 class="card-title">Questions Detected ({{ analysis.questions.count() }})</h2>
+                        </div>
+                        <div class="list-group">
+                            {% for question in analysis.questions.limit(5).all() %}
+                            <div class="list-group-item">
+                                <div class="question-text">{{ question.question_text }}</div>
+                                <small class="text-muted">Confidence: {{ "%.0f"|format(question.confidence * 100) }}%</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h2 class="card-title">Action Items ({{ analysis.actions.count() }})</h2>
+                        </div>
+                        <div class="list-group">
+                            {% for action in analysis.actions.limit(5).all() %}
+                            <div class="list-group-item">
+                                <div class="action-text">{{ action.action_text }}</div>
+                                <small class="text-muted">Confidence: {{ "%.0f"|format(action.confidence * 100) }}%</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if timeline %}
+            <div class="content-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                        Emotion Timeline
+                    </h2>
+                    <button class="btn btn-secondary" onclick="exportTimeline()">Export Timeline</button>
+                </div>
+                <div class="chart-container" style="height: 400px;">
+                    <canvas id="emotionTimelineChart"></canvas>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-header">
+                    <h2 class="card-title">Timeline Details</h2>
+                </div>
+                <div class="timeline-list">
+                    {% for point in timeline[:10] %}
+                    <div class="timeline-item">
+                        <div class="timeline-time">{{ "%.1f"|format(point.start_time) }}s</div>
+                        <div class="timeline-emotion">
+                            <span class="emotion-badge emotion-{{ point.primary_emotion }}">
+                                {{ point.primary_emotion|title }}
+                            </span>
+                            <span class="confidence-badge">{{ "%.0f"|format(point.confidence_score * 100) }}%</span>
+                        </div>
+                        <div class="timeline-text">{{ point.text_content }}</div>
+                    </div>
+                    {% endfor %}
+                    {% if timeline|length > 10 %}
+                    <div class="text-center mt-3">
+                        <button class="btn btn-secondary" onclick="loadMoreTimeline()">
+                            Load More ({{ timeline|length - 10 }} remaining)
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+        {% else %}
+        <div class="content-card text-center" style="padding: 3rem;">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #cbd5e0; margin-bottom: 1rem;">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <h3>No Emotion Analyses Available</h3>
+            <p style="color: #718096;">Import emotion analysis data from MinIO to see results here.</p>
+            <code style="background: #e2e8f0; padding: 0.5rem 1rem; border-radius: 6px; color: #2d3748;">
+                python connect_minio.py
+            </code>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    {% if analysis and timeline %}
+    // Prepare timeline data for chart
+    const timelineData = {{ timeline | map(attribute='start_time') | list | tojson }};
+    const emotionLabels = {{ timeline | map(attribute='primary_emotion') | list | tojson }};
+    const confidenceScores = {{ timeline | map(attribute='confidence_score') | list | tojson }};
+
+    // Emotion color mapping
+    const emotionColors = {
+        'happy': 'rgba(72, 187, 120, 0.8)',
+        'sad': 'rgba(66, 153, 225, 0.8)',
+        'angry': 'rgba(245, 101, 101, 0.8)',
+        'neutral': 'rgba(160, 174, 192, 0.8)',
+        'fear': 'rgba(237, 137, 54, 0.8)',
+        'surprise': 'rgba(246, 224, 94, 0.8)',
+        'disgust': 'rgba(159, 122, 234, 0.8)'
+    };
+
+    // Build emotion timeline chart
+    document.addEventListener("DOMContentLoaded", () => {
+        const canvas = document.getElementById('emotionTimelineChart');
+        if (canvas) {
+            const backgroundColors = emotionLabels.map(emotion => 
+                emotionColors[emotion.toLowerCase()] || 'rgba(160, 174, 192, 0.8)'
+            );
+
+            new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: timelineData.map(t => `${t.toFixed(1)}s`),
+                    datasets: [{
+                        label: 'Confidence Score',
+                        data: confidenceScores,
+                        backgroundColor: backgroundColors,
+                        borderColor: backgroundColors.map(color => color.replace('0.8', '1')),
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    const index = context[0].dataIndex;
+                                    return `${timelineData[index].toFixed(1)}s - ${emotionLabels[index]}`;
+                                },
+                                label: function(context) {
+                                    return `Confidence: ${(context.parsed.y * 100).toFixed(0)}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 1
+                        }
+                    }
+                }
+            });
+        }
+    });
+    {% endif %}
+
+    {% if summary and summary.emotion_percentages %}
+    // Build emotion distribution pie chart
+    document.addEventListener("DOMContentLoaded", () => {
+        const canvas = document.getElementById('emotionDistributionPieChart');
+        if (canvas) {
+            const emotionData = {{ summary.emotion_percentages | tojson }};
+            
+            // Emotion color mapping
+            const emotionColorsPie = {
+                'happy': '#48bb78',
+                'sad': '#4299e1',
+                'angry': '#f56565',
+                'neutral': '#a0aec0',
+                'fear': '#ed8936',
+                'surprise': '#f6e05e',
+                'disgust': '#9f7aea'
+            };
+            
+            const labels = Object.keys(emotionData);
+            const values = Object.values(emotionData);
+            const colors = labels.map(l => emotionColorsPie[l.toLowerCase()] || '#a0aec0');
+            
+            new Chart(canvas, {
+                type: 'pie',
+                data: {
+                    labels: labels.map(l => l.charAt(0).toUpperCase() + l.slice(1)),
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors,
+                        borderWidth: 3,
+                        borderColor: '#fff',
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 14,
+                                    weight: '600'
+                                },
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    if (data.labels.length && data.datasets.length) {
+                                        return data.labels.map((label, i) => {
+                                            const value = data.datasets[0].data[i];
+                                            return {
+                                                text: `${label}: ${value.toFixed(1)}%`,
+                                                fillStyle: data.datasets[0].backgroundColor[i],
+                                                hidden: false,
+                                                index: i
+                                            };
+                                        });
+                                    }
+                                    return [];
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    return `${label}: ${value.toFixed(1)}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+    {% endif %}
+
+    function loadAnalysis(expId) {
+        window.location.href = `/transcription?id=${expId}`;
+    }
+
+    function exportTimeline() {
+        alert('Export functionality coming soon!');
+    }
+
+    function loadMoreTimeline() {
+        alert('Load more functionality coming soon!');
+    }
+</script>
+{% endblock %}

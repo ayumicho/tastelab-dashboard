@@ -1,0 +1,236 @@
+/* Modern Sign Up Page Styling */
+.signup-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+}
+
+.signup-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    max-width: 500px;
+    width: 100%;
+    position: relative;
+}
+
+.signup-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.signup-header {
+    padding: 2.5rem 2rem 1rem;
+    text-align: center;
+    position: relative;
+}
+
+.signup-logo {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.signup-logo svg {
+    width: 40px;
+    height: 40px;
+    color: white;
+}
+
+.signup-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+}
+
+.signup-subtitle {
+    color: #718096;
+    font-size: 1rem;
+    margin-bottom: 0;
+}
+
+.signup-body {
+    padding: 0 2rem 2.5rem;
+}
+
+.form-group-modern {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.form-label-modern {
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 0.5rem;
+    display: block;
+    font-size: 0.95rem;
+}
+
+.form-input-modern {
+    width: 100%;
+    padding: 0.875rem 1rem 0.875rem 3rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #fff;
+    color: #2d3748;
+}
+
+.form-input-modern:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    transform: translateY(-1px);
+}
+
+.form-input-modern::placeholder {
+    color: #a0aec0;
+}
+
+.input-icon {
+    position: absolute;
+    left: 0.875rem;
+    top: 2.125rem;
+    color: #a0aec0;
+    transition: color 0.3s ease;
+    z-index: 10;
+}
+
+.form-group-modern:focus-within .input-icon {
+    color: #667eea;
+}
+
+.password-strength {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.strength-bar {
+    height: 3px;
+    background: #e2e8f0;
+    border-radius: 2px;
+    margin: 0.5rem 0;
+    overflow: hidden;
+}
+
+.strength-fill {
+    height: 100%;
+    transition: all 0.3s ease;
+    border-radius: 2px;
+}
+
+.strength-weak { background: #f56565; width: 25%; }
+.strength-fair { background: #ed8936; width: 50%; }
+.strength-good { background: #48bb78; width: 75%; }
+.strength-strong { background: #38a169; width: 100%; }
+
+.btn-modern-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.btn-modern-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+}
+
+.btn-modern-primary:active {
+    transform: translateY(0);
+}
+
+.signup-footer {
+    text-align: center;
+    padding: 1.5rem 2rem;
+    background: #f7fafc;
+    border-top: 1px solid #e2e8f0;
+}
+
+.signup-footer p {
+    margin: 0;
+    color: #718096;
+    font-size: 0.9rem;
+}
+
+.signup-footer a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.signup-footer a:hover {
+    color: #764ba2;
+    text-decoration: underline;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.validation-message {
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    color: #e53e3e;
+    display: none;
+}
+
+.form-group-modern.invalid .form-input-modern {
+    border-color: #e53e3e;
+}
+
+.form-group-modern.invalid .validation-message {
+    display: block;
+}
+
+.form-group-modern.valid .form-input-modern {
+    border-color: #38a169;
+}
+
+@media (max-width: 768px) {
+    .signup-container {
+        padding: 1rem 0.5rem;
+    }
+
+    .signup-header,
+    .signup-body,
+    .signup-footer {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}

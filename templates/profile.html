@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}
+Profile
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="profile-avatar" onclick="document.getElementById('profile-photo').click()">
+            {% if user.profile_photo %}
+                <img src="{{ url_for('static', filename='uploads/' + user.profile_photo) }}" alt="Profile Photo">
+            {% else %}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            {% endif %}
+            <div class="avatar-upload-overlay">
+                Click to change
+            </div>
+        </div>
+        <h1 class="profile-title">{{ user.first_name }} {{ user.last_name }}</h1>
+        <p class="profile-subtitle">TasteLab Researcher</p>
+    </div>
+
+    <!-- Profile Information Card -->
+    <div class="card">
+        <div class="card-header-2">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            Personal Information
+        </div>
+        <div class="card-body">
+            <form id="profile-form" method="POST" enctype="multipart/form-data">
+                <!-- Hidden file input for profile photo -->
+                <input type="file" id="profile-photo" name="profile_photo" accept="image/*" style="display: none;" onchange="previewImage(event)">
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="firstName" class="form-label">First Name</label>
+                            <input type="text" class="form-input" id="firstName" name="firstName" value="{{ user.first_name }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="lastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-input" id="lastName" name="lastName" value="{{ user.last_name }}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-input" id="email" name="email" value="{{ user.email }}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3 mt-4">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#passwordModal">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17,21 17,13 7,13 7,21"></polyline>
+                            <polyline points="7,3 7,8 15,8"></polyline>
+                        </svg>
+                        Save Changes
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="location.reload()">
+                        Cancel Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Account Settings Card -->
+    <div class="card">
+        <div class="card-header-2">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"></path>
+            </svg>
+            Account Settings
+        </div>
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h6 class="mb-1">Change Password</h6>
+                    <p class="text-muted mb-0 small">Update your account password</p>
+                </div>
+                <button type="button" class="btn btn-outline-primary">
+                    Change Password
+                </button>
+            </div>
+
+            <hr class="my-3">
+
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-1">Account Status</h6>
+                    <p class="text-muted mb-0 small">Your account is active and verified</p>
+                </div>
+                <span class="badge bg-success">Active</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Password Confirmation Modal -->
+<div class="modal fade modal" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="passwordModalLabel">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <circle cx="12" cy="16" r="1"></circle>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    Confirm Your Password
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-3">Please enter your current password to confirm these changes to your profile.</p>
+                <form id="password-form">
+                    <div class="form-group">
+                        <label for="password" class="form-label">Current Password</label>
+                        <input type="password" class="form-input" id="password" name="password" required placeholder="Enter your current password">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn-primary" onclick="submitProfileForm()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2">
+                        <polyline points="20,6 9,17 4,12"></polyline>
+                    </svg>
+                    Confirm Changes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function submitProfileForm() {
+        var password = document.getElementById('password').value;
+        if (!password.trim()) {
+            alert('Please enter your password to confirm changes.');
+            return;
+        }
+
+        var profileForm = document.getElementById('profile-form');
+        var passwordInput = document.createElement('input');
+        passwordInput.type = 'hidden';
+        passwordInput.name = 'password';
+        passwordInput.value = password;
+        profileForm.appendChild(passwordInput);
+
+        // Close modal before submitting
+        var modal = bootstrap.Modal.getInstance(document.getElementById('passwordModal'));
+        modal.hide();
+
+        profileForm.submit();
+    }
+
+    // Profile photo upload functions
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const avatar = document.querySelector('.profile-avatar');
+                avatar.innerHTML = `
+                    <img src="${e.target.result}" alt="Profile Photo Preview">
+                    <div class="avatar-upload-overlay">Click to change</div>
+                `;
+            };
+            reader.readAsDataURL(file);
+
+            // Update upload section text
+            document.querySelector('.upload-text').textContent = `Selected: ${file.name}`;
+        }
+    }
+
+    // Drag and drop functionality
+    function handleDragOver(event) {
+        event.preventDefault();
+        event.currentTarget.classList.add('drag-over');
+    }
+
+    function handleDragLeave(event) {
+        event.currentTarget.classList.remove('drag-over');
+    }
+
+    function handleDrop(event) {
+        event.preventDefault();
+        event.currentTarget.classList.remove('drag-over');
+
+        const files = event.dataTransfer.files;
+        if (files.length > 0) {
+            const file = files[0];
+            if (file.type.startsWith('image/')) {
+                document.getElementById('profile-photo').files = files;
+                previewImage({ target: { files: files } });
+            } else {
+                alert('Please upload an image file.');
+            }
+        }
+    }
+
+    // Add form validation
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('.form-input');
+        inputs.forEach(input => {
+            input.addEventListener('invalid', function() {
+                this.style.borderColor = '#dc3545';
+            });
+
+            input.addEventListener('input', function() {
+                if (this.checkValidity()) {
+                    this.style.borderColor = '#667eea';
+                } else {
+                    this.style.borderColor = '#dc3545';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

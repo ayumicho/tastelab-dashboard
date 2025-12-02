@@ -1,0 +1,460 @@
+/* Base CSS for the Dashboard Application */
+
+/* Sidebar Styling */
+
+/* Sidebar container */
+#sidebar {
+    width: 100%;
+    background: #ffffff;
+    border-right: 1px solid #e9ecef;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+    position: fixed;
+}
+
+/* Sidebar padding styling */
+.sidebar-nav {
+    padding: 1.3rem 0;
+}
+
+/* Individual nav items */
+.sidebar .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    color: #6c757d;
+    font-weight: 500;
+    font-size: 0.95rem;
+    border: none;
+    border-radius: 0;
+    text-decoration: none;
+    margin: 0.25rem 1rem;
+    border-radius: 8px;
+    position: relative;
+}
+
+/* Icon styling in nav links */
+.sidebar .nav-link .nav-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+    opacity: 0.7;
+}
+
+/* Hover effects */
+.sidebar .nav-link:hover {
+    background-color: #f8f9fa;
+    color: #495057;
+    transform: translateX(2px);
+}
+
+.sidebar .nav-link:hover .nav-icon {
+    opacity: 1;
+}
+
+/* Active state */
+.sidebar .nav-link.active {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #ffffff;
+    box-shadow: 0 2px 10px rgba(102, 126, 234, 0.2);
+}
+
+.sidebar .nav-link.active .nav-icon {
+    opacity: 1;
+    filter: brightness(0) invert(1);
+}
+
+/* Section dividers */
+.sidebar-divider {
+    height: 1px;
+    background: #e9ecef;
+    margin: 1rem 1.5rem;
+}
+
+/* Sidebar header */
+.sidebar-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+.sidebar-header h6 {
+    margin: 0;
+    color: #6c757d;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Better responsive behavior */
+@media (max-width: 767.98px) {
+    #sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    #sidebar.show {
+        transform: translateX(0);
+    }
+}
+
+/* Main content adjustment */
+.main-content {
+    transition: margin-left 0.3s ease;
+    padding-top: 60px;
+}
+
+/* Improved spacing for larger sidebar */
+@media (min-width: 768px) {
+    .col-md-2 {
+        flex: 0 0 240px;
+        max-width: 240px;
+    }
+
+    .col-lg-1 {
+        flex: 0 0 240px;
+        max-width: 240px;
+    }
+
+    .col-md-10.ms-sm-auto {
+        margin-left: 240px !important;
+        flex: 0 0 calc(100% - 240px);
+        max-width: calc(100% - 240px);
+    }
+}
+
+.bg-dark {
+    background-color:#0B2027;
+}
+
+/* Search Bar Styling */
+/* search bar container */
+.search-container {
+    position: relative;
+    max-width: 400px;
+    width: 100%;
+}
+
+.search-input {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    border-radius: 8px;
+    padding: 8px 40px 8px 16px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.search-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.search-input:focus {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.search-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.6);
+    pointer-events: none;
+    font-size: 16px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .search-container {
+        max-width: 250px;
+    }
+    .search-shortcut {
+        display: none;
+    }
+}
+
+/* Navbar brand styling */
+.navbar-brand img {
+    transition: transform 0.2s ease;
+}
+
+.navbar-brand:hover img {
+    transform: scale(1.05);
+}
+
+/* Nav links styling */
+.navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-weight: 500;
+    padding: 8px 16px !important;
+    border-radius: 6px;
+    margin: 0 2px;
+    transition: all 0.2s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff !important;
+    transform: translateY(-1px);
+}
+
+/* Custom navbar background */
+.navbar-custom {
+    background: #36384e;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+/* Flash message styling */
+.flash-message {
+    position: fixed;
+    top: 50px; /* Adjusted for navbar height */
+    z-index: 1050; /* Ensures it's above other elements */
+    left: 0;
+    width: 100%;
+}
+
+/* Ensure the whole page uses flexbox to layout */
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+/* Main container to hold the page content and footer */
+.main-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;  
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 0 0 15px 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+    padding: 60px;
+
+}
+
+
+/* The content should take up all the space except the footer */
+.content {
+    flex: 1;
+}
+
+/* Ensure footer stays at the bottom */
+footer {
+  background-color: #f8f9fa;
+  padding: 1rem 0;
+  text-align: center;
+}
+
+
+/* Page styling */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.header {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px 15px 0 0;
+    padding: 30px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-between;
+}
+
+.header-2 {
+    padding: 30px;
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-between;
+}
+
+.header > div {
+    display: flex;
+    flex-direction: column;
+}
+
+.header-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.header-subtitle {
+    color: #666;
+    font-size: 1.1rem;
+    display: flex;
+}
+
+.header-subtitle-2 {
+    color: #666;
+    font-size: 1.4rem;
+    display: flex;
+    padding-bottom: 20px;
+}
+
+.card {    
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.card-2 {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.main-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;  
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 0 0 15px 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+    padding: 60px;
+    padding: 2rem;
+}
+
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.card-header-2 {
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    padding: 1.5rem 2rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #495057;
+    display: flex;
+    align-items: center;
+}
+
+.card-header-2 svg {
+    margin-right: 0.75rem;
+    color: #667eea;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    display: flex;
+    align-items: center;
+}
+
+.card-title svg {
+    margin-right: 0.75rem;
+    color: #667eea;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-secondary {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    border: 1px solid rgba(102, 126, 234, 0.3);
+}
+
+.btn-secondary:hover {
+    background: rgba(102, 126, 234, 0.2);
+}
+
+.btn-one {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    height: 50px;
+    width: 150px;
+}
+
+.btn-one:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    color: white;
+}
+
+
+.btn-success {
+    background: #48bb78;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #38a169;
+}
+
+.btn-cancel {
+    background: #e2dddd;
+    color: #495057;
+}
+
+.btn-cancel:hover {
+    background: #c55151;
+}
+
+.card-badge {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}

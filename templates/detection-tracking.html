@@ -1,0 +1,417 @@
+{% extends "base.html" %}
+
+{% block title %} Object Detection {% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/detection-tracking.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="header">
+        <div>
+            <h1 class="header-title">Object Detection & Tracking</h1>
+            <p class="header-subtitle">Upload experiment video for participants detection and movement analysis</p>
+        </div>
+    </div>
+
+    <div class="main-card">
+        <!-- Upload Section -->
+        <div id="uploadSection">
+            <div class="upload-card">
+                <div class="upload-area" id="uploadArea">
+                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                        <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                    <h3 style="font-size: 1.3rem; font-weight: 600; color: #2d3748; margin-bottom: 0.5rem;">Upload Experiment Video</h3>
+                    <p style="color: #718096; margin-bottom: 1.5rem;">Upload MP4 recording for participants detection analysis</p>
+                    <button class="btn-primary" onclick="document.getElementById('videoInput').click()">
+                        Select Video File
+                    </button>
+                    <input type="file" id="videoInput" class="file-input" accept="video/mp4" onchange="handleVideoSelect(event)">
+                    <p style="color: #718096; font-size: 0.85rem; margin-top: 1rem;">
+                        Supported format: MP4 • Max size: 2GB
+                    </p>
+                </div>
+
+                <div class="file-info" id="fileInfo">
+                    <strong>Selected file:</strong> <span id="fileName"></span><br>
+                    <strong>Size:</strong> <span id="fileSize"></span><br>
+                    <button class="btn-primary" style="margin-top: 1rem;" onclick="processVideo()">Run Object Detection</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Processing Section -->
+        <div class="processing-card" id="processingSection">
+            <div class="spinner"></div>
+            <h3 style="color: #2d3748; margin-bottom: 0.5rem;">Running Object Detection...</h3>
+            <p style="color: #718096;">Analyzing video and detecting participants positions</p>
+            <div style="margin-top: 1.5rem; max-width: 400px; margin-left: auto; margin-right: auto;">
+                <div style="background: #e2e8f0; height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div id="progressBar" style="background: linear-gradient(135deg, #667eea, #764ba2); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+                </div>
+                <p style="color: #718096; font-size: 0.85rem; margin-top: 0.5rem;"><span id="progressText">0%</span> complete</p>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection">
+            <!-- Summary Statistics -->
+            <div class="summary-stats">
+                <div class="stat-box">
+                    <div class="stat-number">12</div>
+                    <div class="stat-label">Participants</div>
+                </div>
+
+                <div class="stat-box">
+                    <div class="stat-number">847</div>
+                    <div class="stat-label">Total Detections</div>
+                </div>
+
+                <div class="stat-box">
+                    <div class="stat-number">95%</div>
+                    <div class="stat-label">Avg. Confidence</div>
+                </div>
+
+                <div class="stat-box">
+                    <div class="stat-number">12:45</div>
+                    <div class="stat-label">Video Duration</div>
+                </div>
+            </div>
+
+            <!-- Interactive Floor Plan -->
+            <div class="floor-plan-card">
+                <h3 class="card-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    </svg>
+                    Lab Floor Plan - Detection Visualization
+                </h3>
+
+                <div class="floor-plan-wrapper">
+                    <svg viewBox="0 0 600 600" style="width: 100%; max-width: 800px; margin: 0 auto; display: block; border-radius: 12px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
+                        <!-- Grid background -->
+                        <defs>
+                            <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+                                <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#e2e8f0" stroke-width="0.5"/>
+                            </pattern>
+                        </defs>
+                        <rect width="600" height="600" fill="#f7fafc"/>
+                        <rect width="600" height="600" fill="url(#grid)"/>
+                        
+                        <!-- Lab walls -->
+                        <rect x="50" y="50" width="500" height="500" fill="white" stroke="#2d3748" stroke-width="6"/>
+                        
+                        <!-- Food station (top center) -->
+                        <rect x="250" y="70" width="100" height="40" fill="#a0aec0" stroke="#718096" stroke-width="2" rx="4"/>
+                        <text x="300" y="95" text-anchor="middle" font-size="10" fill="#2d3748" font-weight="600">Food Station</text>
+                        
+                        <!-- Sink area (top right) -->
+                        <rect x="450" y="70" width="60" height="40" fill="#cbd5e0" stroke="#718096" stroke-width="2" rx="4"/>
+                        
+                        <!-- Tasting table 1 (left side) -->
+                        <rect x="100" y="200" width="80" height="100" fill="#a0aec0" stroke="#718096" stroke-width="2" rx="4" transform="rotate(-25 140 250)"/>
+                        
+                        <!-- Tasting table 2 (left-center) -->
+                        <rect x="120" y="350" width="80" height="100" fill="#a0aec0" stroke="#718096" stroke-width="2" rx="4" transform="rotate(-25 160 400)"/>
+                        
+                        <!-- Round central table -->
+                        <circle cx="300" cy="280" r="60" fill="none" stroke="#718096" stroke-width="3"/>
+                        <circle cx="300" cy="280" r="45" fill="none" stroke="#718096" stroke-width="2"/>
+                        
+                        <!-- Large rectangular table (center-right) -->
+                        <rect x="320" y="350" width="120" height="60" fill="none" stroke="#718096" stroke-width="3" rx="4"/>
+                        <!-- Table chairs -->
+                        <circle cx="340" cy="335" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
+                        <circle cx="370" cy="335" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
+                        <circle cx="400" cy="335" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
+                        <circle cx="430" cy="335" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
+                        <circle cx="340" cy="425" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
+                        <circle cx="370" cy="425" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
+                        <circle cx="400" cy="425" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
+                        <circle cx="430" cy="425" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
+                        
+                        <!-- Round table with chairs (right side) -->
+                        <circle cx="480" cy="240" r="35" fill="none" stroke="#718096" stroke-width="2"/>
+                        <circle cx="480" cy="205" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
+                        <circle cx="515" cy="240" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
+                        <circle cx="480" cy="275" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
+                        <circle cx="445" cy="240" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
+                        
+                        <!-- Camera positions -->
+                        <circle cx="540" cy="300" r="18" fill="#667eea" stroke="white" stroke-width="3"/>
+                        <text x="540" y="305" text-anchor="middle" font-size="14" fill="white" font-weight="700">1</text>
+                        
+                        <circle cx="150" cy="535" r="18" fill="#667eea" stroke="white" stroke-width="3"/>
+                        <text x="150" y="540" text-anchor="middle" font-size="14" fill="white" font-weight="700">2</text>
+                        
+                        <circle cx="450" cy="535" r="18" fill="#667eea" stroke="white" stroke-width="3"/>
+                        <text x="450" y="540" text-anchor="middle" font-size="14" fill="white" font-weight="700">3</text>
+                        
+                        <circle cx="65" cy="300" r="18" fill="#667eea" stroke="white" stroke-width="3"/>
+                        <text x="65" y="305" text-anchor="middle" font-size="14" fill="white" font-weight="700">4</text>
+                        
+                        <circle cx="150" cy="65" r="18" fill="#667eea" stroke="white" stroke-width="3"/>
+                        <text x="150" y="70" text-anchor="middle" font-size="14" fill="white" font-weight="700">5</text>
+                        
+                        <circle cx="450" cy="65" r="18" fill="#667eea" stroke="white" stroke-width="3"/>
+                        <text x="450" y="70" text-anchor="middle" font-size="14" fill="white" font-weight="700">6</text>
+                        
+                        <!-- Detection markers (can be added dynamically) -->
+                        <g id="detectionMarkers">
+                            <circle cx="200" cy="250" r="8" fill="#48bb78" stroke="white" stroke-width="2" class="person-dot" data-time="10:23">
+                                <title>Person detected at 10:23</title>
+                            </circle>
+                            <circle cx="280" cy="320" r="8" fill="#48bb78" stroke="white" stroke-width="2" class="person-dot" data-time="10:24">
+                                <title>Person detected at 10:24</title>
+                            </circle>
+                            <circle cx="350" cy="280" r="8" fill="#48bb78" stroke="white" stroke-width="2" class="person-dot" data-time="10:25">
+                                <title>Person detected at 10:25</title>
+                            </circle>
+                            <circle cx="420" cy="200" r="8" fill="#48bb78" stroke="white" stroke-width="2" class="person-dot" data-time="10:26">
+                                <title>Person detected at 10:26</title>
+                            </circle>
+                            <circle cx="300" cy="450" r="8" fill="#48bb78" stroke="white" stroke-width="2" class="person-dot" data-time="10:27">
+                                <title>Person detected at 10:27</title>
+                            </circle>
+                            <circle cx="180" cy="380" r="8" fill="#48bb78" stroke="white" stroke-width="2" class="person-dot" data-time="10:28">
+                                <title>Person detected at 10:28</title>
+                            </circle>
+                        </g>
+                    </svg>
+                </div>
+
+                <!-- Timeline Scrubber -->
+                <div class="timeline-scrubber">
+                    <div class="timeline-label">
+                        <span>Video Timeline</span>
+                        <span id="currentTime" style="color: #667eea; font-weight: 700;">00:00</span>
+                    </div>
+                    <input type="range" class="timeline-slider" id="timelineSlider" min="0" max="100" value="0">
+                    <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.85rem; color: #718096;">
+                        <span>00:00</span>
+                        <span>12:45</span>
+                    </div>
+                </div>
+            </div>
+<!-- 
+            Zone Occupancy Analysis
+            <div class="floor-plan-card">
+                <h3 class="card-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                    </svg>
+                    Zone Occupancy Analysis
+                </h3>
+
+                <div class="zone-grid">
+                    <div class="zone-card">
+                        <div class="zone-name">Central Area</div>
+                        <div class="zone-count">3</div>
+                        <div class="zone-label">detections</div>
+                    </div>
+
+                    <div class="zone-card">
+                        <div class="zone-name">Tasting Tables</div>
+                        <div class="zone-count">12</div>
+                        <div class="zone-label">detections</div>
+                    </div>
+
+                    <div class="zone-card">
+                        <div class="zone-name">Food Station</div>
+                        <div class="zone-count">10</div>
+                        <div class="zone-label">detections</div>
+                    </div>
+
+                    <div class="zone-card">
+                        <div class="zone-name">Entry/Exit</div>
+                        <div class="zone-count">24</div>
+                        <div class="zone-label">detections</div>
+                    </div>
+
+                    <div class="zone-card">
+                        <div class="zone-name">Waiting Area</div>
+                        <div class="zone-count">98</div>
+                        <div class="zone-label">detections</div>
+                    </div>
+
+                    <div class="zone-card">
+                        <div class="zone-name">Survey Area</div>
+                        <div class="zone-count">124</div>
+                        <div class="zone-label">detections</div>
+                    </div>
+                </div>
+            </div> -->
+
+            <!-- Occupancy Over Time -->
+            <!-- <div class="chart-card">
+                <h3 class="card-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="20" x2="12" y2="10"></line>
+                        <line x1="18" y1="20" x2="18" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="16"></line>
+                    </svg>
+                    Occupancy Over Time
+                </h3>
+
+                <div class="chart-container">
+                    <canvas id="occupancyChart"></canvas>
+                </div>
+            </div> -->
+
+            <!-- Movement Heatmap -->
+            <div class="chart-card">
+                <h3 class="card-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <circle cx="12" cy="12" r="6"></circle>
+                        <circle cx="12" cy="12" r="2"></circle>
+                    </svg>
+                    Movement Heatmap
+                </h3>
+
+                <div style="width: 100%; max-width: 800px; margin: 0 auto; aspect-ratio: 16/9; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #667eea; font-weight: 600;">
+                    Heatmap Visualization (Areas with most activity highlighted)
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<br/><br/><br/>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Upload area interactions
+    const uploadArea = document.getElementById('uploadArea');
+    const videoInput = document.getElementById('videoInput');
+
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFile(files[0]);
+        }
+    });
+
+    function handleVideoSelect(event) {
+        const file = event.target.files[0];
+        handleFile(file);
+    }
+
+    function handleFile(file) {
+        if (file && file.type === 'video/mp4') {
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            document.getElementById('fileInfo').classList.add('active');
+        } else {
+            alert('Please select a valid MP4 file');
+        }
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+        if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+        return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+    }
+
+    function processVideo() {
+        document.getElementById('uploadSection').style.display = 'none';
+        document.getElementById('processingSection').classList.add('active');
+
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 5;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressText').textContent = progress + '%';
+
+            if (progress >= 100) {
+                clearInterval(interval);
+                setTimeout(() => {
+                    document.getElementById('processingSection').classList.remove('active');
+                    document.getElementById('resultsSection').classList.add('active');
+                    initializeCharts();
+                }, 500);
+            }
+        }, 200);
+    }
+
+    // Timeline scrubber
+    const timelineSlider = document.getElementById('timelineSlider');
+    const currentTimeDisplay = document.getElementById('currentTime');
+
+    if (timelineSlider) {
+        timelineSlider.addEventListener('input', function() {
+            const totalSeconds = 765; // 12:45 in seconds
+            const currentSeconds = Math.floor((this.value / 100) * totalSeconds);
+            const minutes = Math.floor(currentSeconds / 60);
+            const seconds = currentSeconds % 60;
+            currentTimeDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            
+            // Update detection markers based on timeline position
+            // This would filter which detection markers are shown
+        });
+    }
+
+    function initializeCharts() {
+        // Occupancy over time chart
+        new Chart(document.getElementById('occupancyChart'), {
+            type: 'line',
+            data: {
+                labels: ['0:00', '2:00', '4:00', '6:00', '8:00', '10:00', '12:00'],
+                datasets: [{
+                    label: 'People Count',
+                    data: [8, 15, 23, 28, 32, 25, 18],
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Participants Detected'
+                        },
+                        grid: {
+                            color: '#f7fafc'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time (minutes)'
+                        },
+                        grid: {
+                            color: '#f7fafc'
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}
