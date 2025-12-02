@@ -3,8 +3,6 @@ from flask_login import current_user, login_required
 from werkzeug.security import check_password_hash
 from sqlalchemy import func
 from datetime import datetime
-
-# Import db and ALL models from models.py
 from models import (
     db, User, Experiment, NlpAnalysis, EmotionSummary, 
     TimelineSegment, ChartBin, DetectedQuestion, DetectedAction, 
