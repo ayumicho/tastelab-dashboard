@@ -8,12 +8,19 @@ from models import (db, NlpAnalysis, EmotionSummary, TimelineSegment, ChartBin,
                     DetectedAction, TextInsight, Experiment)
 from db_names import Tables, Columns
 
-# Initialize MinIO client
+# Retrieve MinIO settings from the Flask application configuration
+MINIO_ENDPOINT = app.config['MINIO_ENDPOINT']
+MINIO_ACCESS_KEY = app.config['MINIO_ACCESS_KEY']
+MINIO_SECRET_KEY = app.config['MINIO_SECRET_KEY']
+MINIO_SECURE = app.config['MINIO_SECURE']
+MINIO_BUCKET = app.cofnig['MINIO_BUCKET']
+
+# Initialize MinIO client using the configuration
 client = Minio(
-    endpoint="194.171.191.226:3135",
-    access_key="tastelab_admin",
-    secret_key="tastelabpassword123",
-    secure=False
+    endpoint=MINIO_ENDPOINT,
+    access_key=MINIO_ACCESS_KEY,
+    secret_key=MINIO_SECRET_KEY,
+    secure=MINIO_SECURE
 )
 
 def list_sessions(bucket_name="tastelab-videos-processed"):
