@@ -1,14 +1,12 @@
 from auth import auth
-from flask import Flask, render_template
+from flask import render_template
 from flask_login import LoginManager, current_user
 from models import User, db
 from views import views
 from config import Config
-import threading
+import time
 from connect_minio import main as run_minio_import
-
-# Create Flask Instance
-app = Flask(__name__)
+from app import app
 
 # Add Database
 app.config.from_object(Config)

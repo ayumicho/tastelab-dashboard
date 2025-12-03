@@ -1,6 +1,6 @@
 import json
 from minio import Minio
-from main import app
+from app import app
 
 class MinIOService:
     def __init__(self):
