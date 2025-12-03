@@ -5,60 +5,110 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/single-experiment.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/experiments.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid pt-4">
-    <a href="{{ url_for('views.experiments') }}" class="btn btn-primary">
-        ← Back to Experiments
-    </a>
-    <br/><br/>
+<div class="container-fluid py-4">
+    <!-- Enhanced Header with Back Button -->
+    <div class="page-navigation">
+        <a href="{{ url_for('views.experiments') }}" class="btn-back">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back to Experiments</span>
+        </a>
+    </div>
     
-    <div class="header">
-        <h1 class="header-title">
-            {{ experiment.title }}
-            {% if analysis %}
-                <span class="analysis-badge">✓ Emotion Analysis Available</span>
-            {% endif %}
-        </h1>
+    <!-- Experiment Header Section -->
+    <div class="experiment-header-section">
+        <div class="header-content-wrapper">
+            <div class="header-main">
+                <h1 class="experiment-main-title">{{ experiment.title }}</h1>
+                {% if analysis %}
+                    <span class="status-badge badge-analysis">
+                        <i class="fas fa-check-circle"></i>
+                        Analysis Complete
+                    </span>
+                {% else %}
+                    <span class="status-badge badge-pending">
+                        <i class="fas fa-clock"></i>
+                        Pending Analysis
+                    </span>
+                {% endif %}
+            </div>
+            <p class="experiment-subtitle">Comprehensive experiment results and emotion analysis</p>
+        </div>
     </div>
 
-    <!-- Experiment Details Card -->
-    <div class="card-2">
-        <h2 class="header-subtitle-2">Experiment Details</h2>
-        <div class="info-grid">
-            <div class="info-item">
-                <span class="info-label">Date:</span>
-                <span class="info-value">{{ experiment.date.strftime('%B %d, %Y') if experiment.date else 'N/A' }}</span>
+    <!-- Quick Stats Overview -->
+    <div class="quick-stats-grid">
+        <div class="quick-stat-card">
+            <div class="stat-icon-wrapper icon-calendar">
+                <i class="fas fa-calendar-alt"></i>
             </div>
-            <div class="info-item">
-                <span class="info-label">Participants:</span>
-                <span class="info-value">{{ experiment.participant_count }}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Duration:</span>
-                <span class="info-value">{{ experiment.format_duration() }}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Status:</span>
-                <span class="info-value">{{ experiment.status }}</span>
+            <div class="stat-content-wrapper">
+                <div class="stat-label">Date</div>
+                <div class="stat-value-text">{{ experiment.date.strftime('%B %d, %Y') if experiment.date else 'N/A' }}</div>
             </div>
         </div>
         
+        <div class="quick-stat-card">
+            <div class="stat-icon-wrapper icon-users">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content-wrapper">
+                <div class="stat-label">Participants</div>
+                <div class="stat-value-text">{{ experiment.participant_count }}</div>
+            </div>
+        </div>
+        
+        <div class="quick-stat-card">
+            <div class="stat-icon-wrapper icon-clock">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-content-wrapper">
+                <div class="stat-label">Duration</div>
+                <div class="stat-value-text">{{ experiment.format_duration() }}</div>
+            </div>
+        </div>
+        
+        <div class="quick-stat-card">
+            <div class="stat-icon-wrapper icon-status">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="stat-content-wrapper">
+                <div class="stat-label">Status</div>
+                <div class="stat-value-text">{{ experiment.status }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Experiment Details Card -->
+    <div class="content-card">
+        <div class="card-header-section">
+            <h2 class="card-title">
+                <i class="fas fa-file-alt"></i>
+                Experiment Details
+            </h2>
+        </div>
+        
         {% if experiment.description %}
-        <div class="description-section">
-            <h3>Description</h3>
-            <p>{{ experiment.description }}</p>
+        <div class="detail-section">
+            <h3 class="section-subtitle">Description</h3>
+            <p class="description-text">{{ experiment.description }}</p>
         </div>
         {% endif %}
         
         {% if experiment.tags %}
-        <div class="tags-section">
-            <h3>Tags</h3>
-            <div class="tags-list">
+        <div class="detail-section">
+            <h3 class="section-subtitle">Tags</h3>
+            <div class="tags-container">
                 {% for tag in experiment.tags.split(',') %}
-                <span class="tag">{{ tag.strip() }}</span>
+                <span class="experiment-tag">
+                    <i class="fas fa-tag"></i>
+                    {{ tag.strip() }}
+                </span>
                 {% endfor %}
             </div>
         </div>
@@ -67,73 +117,104 @@
 
     {% if analysis %}
     <!-- Emotion Analysis Overview -->
-    <div class="card-2">
-        <h2>Emotion Analysis Overview</h2>
-        <div class="row">
-            <div class="col-md-3 mb-3">
-                <div class="emotion-stat-box">
-                    <h4>Dominant Emotion</h4>
-                    <div class="value">{{ analysis.dominant_emotion|title }}</div>
+    <div class="content-card highlight-card">
+        <div class="card-header-section">
+            <h2 class="card-title">
+                <i class="fas fa-brain"></i>
+                Emotion Analysis Overview
+            </h2>
+        </div>
+        
+        <div class="metrics-grid">
+            <div class="metric-box primary-metric">
+                <div class="metric-icon">
+                    <i class="fas fa-smile"></i>
+                </div>
+                <div class="metric-content">
+                    <div class="metric-label">Dominant Emotion</div>
+                    <div class="metric-value">{{ analysis.dominant_emotion|title }}</div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
-                <div class="emotion-stat-box">
-                    <h4>Total Segments</h4>
-                    <div class="value">{{ analysis.total_segments or 0 }}</div>
+            
+            <div class="metric-box">
+                <div class="metric-icon">
+                    <i class="fas fa-list-ol"></i>
+                </div>
+                <div class="metric-content">
+                    <div class="metric-label">Total Segments</div>
+                    <div class="metric-value">{{ analysis.total_segments or 0 }}</div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
-                <div class="emotion-stat-box">
-                    <h4>Words Analyzed</h4>
-                    <div class="value">{{ analysis.word_count or 0 }}</div>
+            
+            <div class="metric-box">
+                <div class="metric-icon">
+                    <i class="fas fa-font"></i>
+                </div>
+                <div class="metric-content">
+                    <div class="metric-label">Words Analyzed</div>
+                    <div class="metric-value">{{ analysis.word_count or 0 }}</div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
-                <div class="emotion-stat-box">
-                    <h4>Reading Time</h4>
-                    <div class="value">{{ "%.1f"|format(analysis.reading_time_minutes or 0) }}m</div>
+            
+            <div class="metric-box">
+                <div class="metric-icon">
+                    <i class="fas fa-book-reader"></i>
+                </div>
+                <div class="metric-content">
+                    <div class="metric-label">Reading Time</div>
+                    <div class="metric-value">{{ "%.1f"|format(analysis.reading_time_minutes or 0) }}m</div>
                 </div>
             </div>
         </div>
 
         {% if summary and summary.emotion_percentages %}
-        <div style="margin-top: 2rem;">
-            <h3 style="color: #2d3748; margin-bottom: 1rem;">Emotion Distribution</h3>
-            <div class="row">
-                <div class="col-md-8">
+        <div class="emotion-distribution-section">
+            <h3 class="section-subtitle">Emotion Distribution</h3>
+            <div class="distribution-layout">
+                <div class="distribution-bars">
                     {% for emotion, percentage in summary.emotion_percentages.items() %}
-                    <div class="emotion-bar-container">
-                        <div class="emotion-bar-label">
-                            <span>{{ emotion|title }}</span>
-                            <span>{{ "%.1f"|format(percentage) }}%</span>
+                    <div class="emotion-bar-wrapper">
+                        <div class="emotion-bar-header">
+                            <span class="emotion-name">
+                                <i class="fas fa-circle emotion-indicator"></i>
+                                {{ emotion|title }}
+                            </span>
+                            <span class="emotion-percentage">{{ "%.1f"|format(percentage) }}%</span>
                         </div>
-                        <div class="emotion-bar">
-                            <div class="emotion-bar-fill" style="width: {{ percentage }}%;"></div>
+                        <div class="emotion-progress-bar">
+                            <div class="emotion-progress-fill" style="width: {{ percentage }}%;" data-emotion="{{ emotion|lower }}"></div>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
-                <div class="col-md-4">
-                    <canvas id="emotionPieChart" style="max-height: 250px;"></canvas>
+                <div class="distribution-chart">
+                    <canvas id="emotionPieChart"></canvas>
                 </div>
             </div>
         </div>
         {% endif %}
 
-        <div style="margin-top: 2rem; text-align: center;">
-            <a href="{{ url_for('views.transcription', id=experiment.id) }}" class="btn btn-primary btn-lg">
-                View Full Emotion Analysis →
+        <div class="action-button-section">
+            <a href="{{ url_for('views.transcription', id=experiment.id) }}" class="btn-action primary">
+                <i class="fas fa-chart-line"></i>
+                View Full Emotion Analysis
+                <i class="fas fa-arrow-right"></i>
             </a>
         </div>
     </div>
 
     <!-- Keywords Section -->
     {% if keywords_preview %}
-    <div class="card-2">
-        <h2>Top Keywords</h2>
-        <div class="keyword-cloud">
+    <div class="content-card">
+        <div class="card-header-section">
+            <h2 class="card-title">
+                <i class="fas fa-key"></i>
+                Top Keywords
+            </h2>
+        </div>
+        <div class="keyword-cloud-container">
             {% for keyword in keywords_preview %}
-                <span class="keyword-tag">{{ keyword.text }}</span>
+                <span class="keyword-bubble">{{ keyword.text }}</span>
             {% endfor %}
         </div>
     </div>
@@ -141,20 +222,33 @@
 
     <!-- Timeline Preview -->
     {% if timeline_preview %}
-    <div class="card-2">
-        <h2>Emotion Timeline Preview</h2>
-        <div class="timeline-preview">
+    <div class="content-card">
+        <div class="card-header-section">
+            <h2 class="card-title">
+                <i class="fas fa-stream"></i>
+                Emotion Timeline Preview
+            </h2>
+        </div>
+        <div class="timeline-container">
             {% for segment in timeline_preview %}
-            <div class="timeline-item">
-                <div class="timeline-time">{{ "%.1f"|format(segment.start_time) }}s</div>
-                <span class="timeline-emotion">{{ segment.primary_emotion|title }}</span>
-                <div class="timeline-text">{{ segment.text_content }}</div>
+            <div class="timeline-segment">
+                <div class="timeline-timestamp">
+                    <i class="fas fa-clock"></i>
+                    {{ "%.1f"|format(segment.start_time) }}s
+                </div>
+                <div class="timeline-content">
+                    <span class="timeline-emotion-badge" data-emotion="{{ segment.primary_emotion|lower }}">
+                        {{ segment.primary_emotion|title }}
+                    </span>
+                    <p class="timeline-text">{{ segment.text_content }}</p>
+                </div>
             </div>
             {% endfor %}
         </div>
         {% if timeline_preview|length >= 10 %}
-        <div style="text-align: center; margin-top: 1rem;">
-            <a href="{{ url_for('views.transcription', id=experiment.id) }}" class="btn btn-secondary">
+        <div class="action-button-section">
+            <a href="{{ url_for('views.transcription', id=experiment.id) }}" class="btn-action secondary">
+                <i class="fas fa-list"></i>
                 View Complete Timeline
             </a>
         </div>
@@ -162,55 +256,91 @@
     </div>
     {% endif %}
 
-    <!-- Questions & Actions -->
-    <div class="row">
+    <!-- Questions & Analysis Stats -->
+    <div class="two-column-grid">
         {% if questions_preview %}
-        <div class="col-md-6">
-            <div class="card-2">
-                <h2>Questions Detected ({{ analysis.questions.count() }})</h2>
+        <div class="content-card">
+            <div class="card-header-section">
+                <h2 class="card-title">
+                    <i class="fas fa-question-circle"></i>
+                    Questions Detected
+                </h2>
+                <span class="count-badge">{{ analysis.questions.count() }}</span>
+            </div>
+            <div class="questions-list">
                 {% for question in questions_preview %}
-                <div class="list-item">
-                    <div class="list-item-text">{{ question.question_text }}</div>
-                    <div class="list-item-meta">
-                        Confidence: {{ "%.0f"|format(question.confidence * 100) }}%
+                <div class="question-item">
+                    <div class="question-text">
+                        <i class="fas fa-quote-left"></i>
+                        {{ question.question_text }}
+                    </div>
+                    <div class="question-meta">
+                        <span class="confidence-badge">
+                            <i class="fas fa-check"></i>
+                            Confidence: {{ "%.0f"|format(question.confidence * 100) }}%
+                        </span>
                     </div>
                 </div>
                 {% endfor %}
-                {% if analysis.questions.count() > 5 %}
-                <div style="text-align: center; margin-top: 1rem;">
-                    <a href="{{ url_for('views.transcription', id=experiment.id) }}" class="btn btn-secondary">
-                        View All Questions
-                    </a>
-                </div>
-                {% endif %}
             </div>
+            {% if analysis.questions.count() > 5 %}
+            <div class="action-button-section">
+                <a href="{{ url_for('views.transcription', id=experiment.id) }}" class="btn-action secondary">
+                    View All Questions
+                </a>
+            </div>
+            {% endif %}
         </div>
         {% endif %}
 
-        <div class="col-md-6">
-            <div class="card-2">
-                <h2>Analysis Stats</h2>
-                <div class="emotion-stat-box" style="margin-bottom: 1rem;">
-                    <h4>Source Video</h4>
-                    <div style="color: #4a5568; font-size: 1rem; margin-top: 0.5rem;">
-                        {{ analysis.source_filename }}
+        <div class="content-card">
+            <div class="card-header-section">
+                <h2 class="card-title">
+                    <i class="fas fa-chart-bar"></i>
+                    Analysis Statistics
+                </h2>
+            </div>
+            <div class="stats-list">
+                <div class="stat-item">
+                    <div class="stat-item-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <div class="stat-item-content">
+                        <div class="stat-item-label">Source Video</div>
+                        <div class="stat-item-value">{{ analysis.source_filename }}</div>
                     </div>
                 </div>
-                <div class="emotion-stat-box" style="margin-bottom: 1rem;">
-                    <h4>Analyzed At</h4>
-                    <div style="color: #4a5568; font-size: 1rem; margin-top: 0.5rem;">
-                        {{ analysis.analyzed_at.strftime('%Y-%m-%d %H:%M:%S') if analysis.analyzed_at else 'N/A' }}
+                
+                <div class="stat-item">
+                    <div class="stat-item-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-item-content">
+                        <div class="stat-item-label">Analyzed At</div>
+                        <div class="stat-item-value">
+                            {{ analysis.analyzed_at.strftime('%Y-%m-%d %H:%M:%S') if analysis.analyzed_at else 'N/A' }}
+                        </div>
                     </div>
                 </div>
-                <div class="emotion-stat-box" style="margin-bottom: 1rem;">
-                    <h4>Model Used</h4>
-                    <div style="color: #4a5568; font-size: 1rem; margin-top: 0.5rem;">
-                        {{ analysis.model_used or 'N/A' }}
+                
+                <div class="stat-item">
+                    <div class="stat-item-icon">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                    <div class="stat-item-content">
+                        <div class="stat-item-label">Model Used</div>
+                        <div class="stat-item-value">{{ analysis.model_used or 'N/A' }}</div>
                     </div>
                 </div>
-                <div class="emotion-stat-box">
-                    <h4>Action Items Detected</h4>
-                    <div class="value">{{ analysis.actions.count() }}</div>
+                
+                <div class="stat-item highlight">
+                    <div class="stat-item-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="stat-item-content">
+                        <div class="stat-item-label">Action Items Detected</div>
+                        <div class="stat-item-value-large">{{ analysis.actions.count() }}</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -218,18 +348,21 @@
 
     {% else %}
     <!-- No Analysis Available -->
-    <div class="card-2">
-        <h2>Emotion Analysis</h2>
-        <div class="no-analysis-box">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="16" x2="12" y2="12"></line>
-                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-            </svg>
-            <h3>No Emotion Analysis Data Available</h3>
-            <p>Import emotion analysis data from MinIO to see detailed insights for this experiment.</p>
-            <code>python connect_minio.py</code>
-            <p style="margin-top: 1rem; font-size: 0.875rem;">
+    <div class="content-card no-analysis-card">
+        <div class="empty-state-container">
+            <div class="empty-state-icon">
+                <i class="fas fa-database"></i>
+            </div>
+            <h3 class="empty-state-title">No Emotion Analysis Data Available</h3>
+            <p class="empty-state-description">
+                Import emotion analysis data from MinIO to see detailed insights for this experiment.
+            </p>
+            <div class="code-block">
+                <i class="fas fa-terminal"></i>
+                <code>python connect_minio.py</code>
+            </div>
+            <p class="empty-state-note">
+                <i class="fas fa-info-circle"></i>
                 The import script will automatically link analysis data to this experiment based on the video filename or date.
             </p>
         </div>
@@ -266,7 +399,7 @@
                     datasets: [{
                         data: values,
                         backgroundColor: colors,
-                        borderWidth: 2,
+                        borderWidth: 3,
                         borderColor: '#fff'
                     }]
                 },
@@ -279,7 +412,27 @@
                             labels: {
                                 padding: 15,
                                 font: {
-                                    size: 12
+                                    size: 13,
+                                    weight: '600'
+                                },
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            cornerRadius: 8,
+                            titleFont: {
+                                size: 14,
+                                weight: '600'
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.parsed.toFixed(1) + '%';
                                 }
                             }
                         }

@@ -3,79 +3,122 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/experiments.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
-    <div class="header">
-        <div>
-            <h1 class="header-title"> Experiments</h1>
-            <p class="header-subtitle">Browse and analyze historical sensory testing experiments</p>
+    <!-- Enhanced Header Section -->
+    <div class="header-section">
+        <div class="header-content">
+            <div class="header-text">
+                <h1 class="page-title">Experiments Dashboard</h1>
+                <p class="page-subtitle">Browse, analyze, and manage sensory testing experiments</p>
+            </div>
+            <div class="header-actions">
+                <form method="POST" action="{{ url_for('views.manual_sync') }}" style="display: inline;">
+                    <button type="submit" class="btn btn-secondary">
+                        <i class="fas fa-sync"></i> Sync Data
+                    </button>
+                </form>
+                <button class="btn btn-primary" onclick="location.href='/experiments/add-experiment'">
+                    <i class="fas fa-plus"></i> New Experiment
+                </button>
+            </div>
         </div>
-        <button class="btn btn-one" onclick="location.href='/experiments/add-experiment'">Add Experiment</button>
     </div>
 
-    <!-- Tab links -->
+    <!-- Tabs Container -->
     <div class="tabs-container">
         <div class="tabs-nav">
-            <button class="tab-button active" onclick="openTab(event, 'recent')">Recent</button>
-            <button class="tab-button" onclick="openTab(event, 'completed')">All Experiments</button>
-            <button class="tab-button" onclick="openTab(event, 'archived')">Archived</button>
+            <button class="tab-button active" onclick="openTab(event, 'recent')">
+                <i class="fas fa-clock"></i>
+                <span>Recent</span>
+            </button>
+            <button class="tab-button" onclick="openTab(event, 'completed')">
+                <i class="fas fa-list"></i>
+                <span>All Experiments</span>
+            </button>
+            <button class="tab-button" onclick="openTab(event, 'archived')">
+                <i class="fas fa-archive"></i>
+                <span>Archived</span>
+            </button>
         </div>
 
         <!-- Recent Experiments Tab -->
         <div id="recent" class="tab-content active">
-            <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle filter-select" type="button" id="categoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    <span id="selectedCategory">All Categories</span>
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="categoryDropdown">
-                    <li><a class="dropdown-item active" href="#" data-category="">All Categories</a></li>
-                    {% for tag in tags %}
-                    <li><a class="dropdown-item" href="#" data-category="{{ tag }}">{{ tag }}</a></li>
-                    {% endfor %}
-                </ul>
+            <div class="tab-header">
+                <div class="tab-info">
+                    <h2 class="tab-title">Recent Experiments</h2>
+                    <p class="tab-description">Latest experiments from the past 30 days</p>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-filter dropdown-toggle" type="button" id="categoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-filter"></i>
+                        <span id="selectedCategory">All Categories</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="categoryDropdown">
+                        <li><a class="dropdown-item active" href="#" data-category="">All Categories</a></li>
+                        {% for tag in tags %}
+                        <li><a class="dropdown-item" href="#" data-category="{{ tag }}">{{ tag }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
 
             {% if recent_experiments %}
                 <div class="experiments-grid">
                 {% for experiment in recent_experiments %}
                     <div class="experiment-card" data-tags="{{ experiment.tags if experiment.tags else '' }}">
-                        <div class="experiment-header">
-                            <div>
-                                <h3 class="experiment-title">{{ experiment.title }}</h3>
-                                <div class="experiment-date">{{ experiment.date.strftime('%B %d, %Y') if experiment.date else 'N/A' }}</div>
+                        <div class="card-header">
+                            <div class="card-title-section">
+                                <h3 class="card-title">{{ experiment.title }}</h3>
+                                <div class="card-date">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    {{ experiment.date.strftime('%B %d, %Y') if experiment.date else 'N/A' }}
+                                </div>
                             </div>
                         </div>
-                        <p class="experiment-description">
-                            {{ experiment.description }}
-                        </p>
-                        <div class="tags-section">
-                            {% if experiment.tags %}
-                            <div class="tags-list">
-                                {% for tag in experiment.tags.split(',') %}
-                                <span class="tag">{{ tag.strip() }}</span>
-                                {% endfor %}
-                            </div>
-                            {% endif %}
+                        
+                        <p class="card-description">{{ experiment.description }}</p>
+                        
+                        {% if experiment.tags %}
+                        <div class="tags-container">
+                            {% for tag in experiment.tags.split(',') %}
+                            <span class="tag">{{ tag.strip() }}</span>
+                            {% endfor %}
                         </div>
-                        <div class="experiment-stats">
-                            <div class="stat">
-                                <div class="stat-value">{{ experiment.participant_count }}</div>
-                                <div class="stat-label">Participants</div>
+                        {% endif %}
+                        
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <i class="fas fa-users stat-icon"></i>
+                                <div class="stat-content">
+                                    <div class="stat-value">{{ experiment.participant_count }}</div>
+                                    <div class="stat-label">Participants</div>
+                                </div>
                             </div>
-                            <div class="stat">
-                                <div class="stat-value">{{ experiment.avg_score }}</div>
-                                <div class="stat-label">Avg Score</div>
+                            <div class="stat-item">
+                                <i class="fas fa-star stat-icon"></i>
+                                <div class="stat-content">
+                                    <div class="stat-value">{{ experiment.avg_score }}</div>
+                                    <div class="stat-label">Avg Score</div>
+                                </div>
                             </div>
-                            <div class="stat">
-                                <div class="stat-value">{{ experiment.format_duration() }}</div>
-                                <div class="stat-label">Duration</div>
+                            <div class="stat-item">
+                                <i class="fas fa-clock stat-icon"></i>
+                                <div class="stat-content">
+                                    <div class="stat-value">{{ experiment.format_duration() }}</div>
+                                    <div class="stat-label">Duration</div>
+                                </div>
                             </div>
                         </div>
-                        <div class="experiment-actions">
-                            <a href="{{ url_for('views.view_experiment', experiment_id=experiment.id) }}" class="btn btn-primary">
-                            View Results
+                        
+                        <div class="card-footer">
+                            <a href="{{ url_for('views.view_experiment', experiment_id=experiment.id) }}" class="btn btn-view">
+                                View Results <i class="fas fa-arrow-right"></i>
                             </a>
                         </div>
                     </div>    
@@ -83,61 +126,94 @@
                 </div>
             {% else %}
                 <div class="empty-state">
-                    <h3>No completed experiments yet</h3>
-                    <p>Completed experiments will appear here</p>
+                    <div class="empty-icon">
+                        <i class="fas fa-flask"></i>
+                    </div>
+                    <h3>No Recent Experiments</h3>
+                    <p>Recent experiments from the past 30 days will appear here</p>
+                    <button class="btn btn-primary" onclick="location.href='/experiments/add-experiment'">
+                        <i class="fas fa-plus"></i> Create First Experiment
+                    </button>
                 </div>
             {% endif %}
         </div>
 
         <!-- All Experiments Tab -->
         <div id="completed" class="tab-content">
-            <select class="filter-select">
-                <option>All Time Periods</option>
-                <option>Last 3 Months</option>
-                <option>Last 6 Months</option>
-                <option>Last Year</option>
-            </select>
+            <div class="tab-header">
+                <div class="tab-info">
+                    <h2 class="tab-title">All Experiments</h2>
+                    <p class="tab-description">Complete history of experiments</p>
+                </div>
+                <select class="btn btn-filter">
+                    <option>All Time Periods</option>
+                    <option>Last 3 Months</option>
+                    <option>Last 6 Months</option>
+                    <option>Last Year</option>
+                </select>
+            </div>
 
             {% if all_experiments %}
                 <div class="experiments-grid">
                 {% for experiment in all_experiments %}    
                     <div class="experiment-card">
-                        <div class="status-badge status-completed">All</div>
-                        <div class="experiment-header">
-                            <div>
-                                <h3 class="experiment-title">{{ experiment.title }}</h3>
-                                <div class="experiment-date">{{ experiment.date }}</div>
+                        <div class="card-badge badge-completed">Completed</div>
+                        <div class="card-header">
+                            <div class="card-title-section">
+                                <h3 class="card-title">{{ experiment.title }}</h3>
+                                <div class="card-date">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    {{ experiment.date }}
+                                </div>
                             </div>
                         </div>
-                        <p class="experiment-description">
-                            {{ experiment.description }}
-                        </p>
-                        <div class="experiment-tags">
+                        
+                        <p class="card-description">{{ experiment.description }}</p>
+                        
+                        {% if experiment.tags %}
+                        <div class="tags-container">
                             <span class="tag">{{ experiment.tags }}</span>
                         </div>
-                        <div class="experiment-stats">
-                            <div class="stat">
-                                <div class="stat-value">{{ experiment.participant_count }}</div>
-                                <div class="stat-label">Participants</div>
+                        {% endif %}
+                        
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <i class="fas fa-users stat-icon"></i>
+                                <div class="stat-content">
+                                    <div class="stat-value">{{ experiment.participant_count }}</div>
+                                    <div class="stat-label">Participants</div>
+                                </div>
                             </div>
-                            <div class="stat">
-                                <div class="stat-value">{{ experiment.avg_score }}</div>
-                                <div class="stat-label">Avg Score</div>
+                            <div class="stat-item">
+                                <i class="fas fa-star stat-icon"></i>
+                                <div class="stat-content">
+                                    <div class="stat-value">{{ experiment.avg_score }}</div>
+                                    <div class="stat-label">Avg Score</div>
+                                </div>
                             </div>
-                            <div class="stat">
-                                <div class="stat-value">{{ experiment.format_duration() }}</div>
-                                <div class="stat-label">Duration</div>
+                            <div class="stat-item">
+                                <i class="fas fa-clock stat-icon"></i>
+                                <div class="stat-content">
+                                    <div class="stat-value">{{ experiment.format_duration() }}</div>
+                                    <div class="stat-label">Duration</div>
+                                </div>
                             </div>
                         </div>
-                        <div class="experiment-actions">
-                            <button href="{{ url_for('views.view_experiment', experiment_id=experiment.id) }}"  class="btn btn-primary">Full Report</button>
+                        
+                        <div class="card-footer">
+                            <a href="{{ url_for('views.view_experiment', experiment_id=experiment.id) }}" class="btn btn-view">
+                                Full Report <i class="fas fa-arrow-right"></i>
+                            </a>
                         </div>
                     </div>
                 {% endfor %}    
                 </div>
             {% else %}
                 <div class="empty-state">
-                    <h3>No completed experiments yet</h3>
+                    <div class="empty-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <h3>No Experiments Yet</h3>
                     <p>Completed experiments will appear here</p>
                 </div>
             {% endif %}
@@ -145,46 +221,74 @@
 
         <!-- Archived Experiments Tab -->
         <div id="archived" class="tab-content">
+            <div class="tab-header">
+                <div class="tab-info">
+                    <h2 class="tab-title">Archived Experiments</h2>
+                    <p class="tab-description">Historical experiments that have been archived</p>
+                </div>
+            </div>
+
             {% if archived_experiments %}
                 <div class="experiments-grid">
                 {% for experiment in archived_experiments %}    
-                    <div class="experiment-card">
-                        <div class="status-badge status-archived">{{ experiment.status }}</div>
-                        <div class="experiment-header">
-                            <div>
-                                <h3 class="experiment-title">{{ experiment.title }}</h3>
-                                <div class="experiment-date">{{ experiment.date }}</div>
+                    <div class="experiment-card archived">
+                        <div class="card-badge badge-archived">Archived</div>
+                        <div class="card-header">
+                            <div class="card-title-section">
+                                <h3 class="card-title">{{ experiment.title }}</h3>
+                                <div class="card-date">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    {{ experiment.date }}
+                                </div>
                             </div>
                         </div>
-                        <p class="experiment-description">
-                            {{ experiment.description }}
-                        </p>
-                        <div class="experiment-tags">
+                        
+                        <p class="card-description">{{ experiment.description }}</p>
+                        
+                        {% if experiment.tags %}
+                        <div class="tags-container">
                             <span class="tag">{{ experiment.tags }}</span>
                         </div>
-                        <div class="experiment-stats">
-                            <div class="stat">
-                                <div class="stat-value">{{ experiment.participant_count }}</div>
-                                <div class="stat-label">Participants</div>
+                        {% endif %}
+                        
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <i class="fas fa-users stat-icon"></i>
+                                <div class="stat-content">
+                                    <div class="stat-value">{{ experiment.participant_count }}</div>
+                                    <div class="stat-label">Participants</div>
+                                </div>
                             </div>
-                            <div class="stat">
-                                <div class="stat-value">{{ experiment.avg_score }}</div>
-                                <div class="stat-label">Avg Score</div>
+                            <div class="stat-item">
+                                <i class="fas fa-star stat-icon"></i>
+                                <div class="stat-content">
+                                    <div class="stat-value">{{ experiment.avg_score }}</div>
+                                    <div class="stat-label">Avg Score</div>
+                                </div>
                             </div>
-                            <div class="stat">
-                                <div class="stat-value">{{ experiment.format_duration() }}</div>
-                                <div class="stat-label">Duration</div>
+                            <div class="stat-item">
+                                <i class="fas fa-clock stat-icon"></i>
+                                <div class="stat-content">
+                                    <div class="stat-value">{{ experiment.format_duration() }}</div>
+                                    <div class="stat-label">Duration</div>
+                                </div>
                             </div>
                         </div>
-                        <div class="experiment-actions">
-                            <button class="btn btn-primary">View Archive</button>
+                        
+                        <div class="card-footer">
+                            <button class="btn btn-view">
+                                View Archive <i class="fas fa-arrow-right"></i>
+                            </button>
                         </div>
                     </div>
                 {% endfor %}        
                 </div>
             {% else %}
                 <div class="empty-state">
-                    <h3>No archived experiments yet</h3>
+                    <div class="empty-icon">
+                        <i class="fas fa-archive"></i>
+                    </div>
+                    <h3>No Archived Experiments</h3>
                     <p>Archived experiments will appear here</p>
                 </div>
             {% endif %}                    
@@ -194,25 +298,23 @@
 
 <script>
     function openTab(event, tabName) {
-        console.log('Tab clicked:', tabName);
-        
-        //Hide all tab content
+        // Hide all tab content
         const tabContents = document.querySelectorAll('.tab-content');
-        tabContents.forEach(content=> {
+        tabContents.forEach(content => {
             content.classList.remove('active');   
         });
 
-        //Remove active class from all buttons
+        // Remove active class from all buttons
         const tabButtons = document.querySelectorAll('.tab-button');
         tabButtons.forEach(button => {
             button.classList.remove('active');
         });
 
-        //show the selected tab
-        document.getElementById(tabName).classList.add('active');
-        console.log('Active tab now:', document.getElementById(tabName));
+        // Show the selected tab
+        const selectedTab = document.getElementById(tabName);
+        selectedTab.classList.add('active');
 
-        // Add active class
+        // Add active class to clicked button
         event.currentTarget.classList.add('active');
     }
 

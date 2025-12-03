@@ -4,6 +4,8 @@ from flask_login import LoginManager, current_user
 from models import User, db
 from views import views
 from config import Config
+import threading
+from connect_minio import main as run_minio_import
 
 # Create Flask Instance
 app = Flask(__name__)
@@ -23,6 +25,17 @@ login_manager = LoginManager()
 login_manager.login_view = "auth.login"
 login_manager.init_app(app)
 
+def continuous_minio_import():
+    """Function that runs the import repeatedly."""
+    while True:
+        try:
+            run_minio_import()
+            # Wait for a period (e.g., 60 minutes) before checking MinIO again
+            time.sleep(3600)  # 3600 seconds = 1 hour
+        except Exception as e:
+            print(f"Error in continuous import thread: {e}")
+            time.sleep(600) # Wait 10 mins after failure
+            
 
 # Function to load user given its ID
 @login_manager.user_loader

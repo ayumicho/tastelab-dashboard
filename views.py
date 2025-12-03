@@ -402,3 +402,28 @@ def analytics():
 @login_required
 def detection_tracking():
     return render_template("detection-tracking.html", user=current_user)
+
+@views.route('/admin/sync-minio', methods=['POST'])
+@login_required
+def manual_sync():
+    """Manual trigger for MinIO sync"""
+    try:
+        from sync.minio_sync import sync_new_analyses
+        # Call without max_imports to import all available files
+        result = sync_new_analyses(max_imports=None)
+        
+        message = (f"Sync complete in {result['duration']}s: "
+                  f"{result['new_imports']} new analyses imported, "
+                  f"{result['skipped']} already exist")
+        
+        if result['errors'] > 0:
+            message += f", {result['errors']} errors (check logs)"
+        
+        flash(message, category="success" if result['errors'] == 0 else "warning")
+        
+    except Exception as e:
+        flash(f"Sync failed: {str(e)}", category="error")
+        import traceback
+        print(traceback.format_exc())
+    
+    return redirect(request.referrer or url_for('views.experiments'))

@@ -1,101 +1,11 @@
-from sync.data_import import insert_analysis_data, find_or_create_experiment
-import json
-from main import app
-from minio import Minio
 from datetime import datetime
-from models import (db, NlpAnalysis, EmotionSummary, TimelineSegment, ChartBin,
-                    TranscriptSummary, Keyword, TopicSentiment, DetectedQuestion, 
-                    DetectedAction, TextInsight, Experiment)
-from db_names import Tables, Columns
-
-# Initialize MinIO client
-client = Minio(
-    endpoint="194.171.191.226:3135",
-    access_key="tastelab_admin",
-    secret_key="tastelabpassword123",
-    secure=False
+from main import app
+from models import (
+    db, NlpAnalysis, EmotionSummary, TimelineSegment, ChartBin,
+    TranscriptSummary, Keyword, TopicSentiment, DetectedQuestion,
+    DetectedAction, TextInsight, Experiment
 )
-
-def list_sessions(bucket_name="tastelab-videos-processed"):
-    """List all available sessions"""
-    sessions = {}
-    
-    try:
-        objects = client.list_objects(bucket_name, recursive=True)
-        
-        for obj in objects:
-            path = obj.object_name
-            parts = path.split('/')
-            
-            if (len(parts) >= 5 and 
-                parts[2] == 'pipeline_outputs' and 
-                parts[3] == 'analysis' and 
-                '.chart_data.json' in parts[-1]):
-                
-                date_folder = parts[0]
-                session_folder = parts[1]
-                session_key = f"{date_folder}/{session_folder}"
-                
-                filename = parts[-1]
-                video_name = filename.replace('.chart_data.json', '')
-                
-                if session_key not in sessions:
-                    sessions[session_key] = []
-                
-                sessions[session_key].append(video_name)
-        
-        return sessions
-        
-    except Exception as e:
-        print(f"Error listing sessions: {e}")
-        return {}
-
-
-def read_json_from_minio(bucket_name, object_name):
-    """Read and parse JSON file from MinIO"""
-    response = None
-    try:
-        response = client.get_object(bucket_name, object_name)
-        json_bytes = response.read()
-        json_data = json.loads(json_bytes.decode('utf-8'))
-        return json_data
-    except Exception as e:
-        print(f"Error: {str(e)[:100]}")
-        return None
-    finally:
-        if response:
-            response.close()
-            response.release_conn()
-
-
-def load_session_data(bucket_name, date_folder, session_folder, video_name):
-    """Load all JSON files for a specific video"""
-    base_path = f"{date_folder}/{session_folder}/pipeline_outputs"
-    
-    print(f"\n{'='*70}")
-    print(f"Loading: {date_folder}/{session_folder}/{video_name}")
-    print(f"{'='*70}")
-    
-    data = {}
-    
-    file_mapping = {
-        'chart_data': f"{base_path}/analysis/{video_name}.chart_data.json",
-        'keyword_cloud': f"{base_path}/analysis/{video_name}.keyword_cloud.json",
-        'insights': f"{base_path}/insights/{video_name}.insights.json",
-        'sentiment': f"{base_path}/sentiment_analysis/{video_name}.sentiment.json",
-        'summary': f"{base_path}/summaries/{video_name}.summary.json"
-    }
-    
-    for key, path in file_mapping.items():
-        print(f"  Reading {key}...", end=" ")
-        result = read_json_from_minio(bucket_name, path)
-        if result:
-            data[key] = result
-            print("✓")
-        else:
-            print("✗")
-    
-    return data
+from db_names import Columns
 
 
 def find_or_create_experiment(video_name, date_folder, session_folder):
@@ -110,7 +20,7 @@ def find_or_create_experiment(video_name, date_folder, session_folder):
     ).first()
     
     if exp:
-        print(f"Found existing experiment: '{exp.title}'")
+        app.logger.info(f"Found existing experiment: '{exp.title}'")
         return exp
     
     # Strategy 2: Try to find by date
@@ -126,13 +36,13 @@ def find_or_create_experiment(video_name, date_folder, session_folder):
             ).first()
             
             if exp:
-                print(f"Found experiment by date: '{exp.title}'")
+                app.logger.info(f"Found experiment by date: '{exp.title}'")
                 return exp
     except:
         pass
     
     # Strategy 3: Create a new experiment automatically
-    print(f"Creating new experiment from NLP analysis...")
+    app.logger.info(f"Creating new experiment from NLP analysis...")
     
     try:
         date_parts = date_folder.split('-')
@@ -159,7 +69,7 @@ def find_or_create_experiment(video_name, date_folder, session_folder):
     db.session.add(new_exp)
     db.session.flush()
     
-    print(f"Created new experiment: '{title}' (ID: {new_exp.id})")
+    app.logger.info(f"Created new experiment: '{title}' (ID: {new_exp.id})")
     return new_exp
 
 
@@ -174,11 +84,11 @@ def insert_analysis_data(session_data, date_folder, session_folder, video_name):
         has_keywords = 'keyword_cloud' in session_data
         has_summary = 'summary' in session_data
         
-        print(f"\n  Files: sentiment={has_sentiment}, insights={has_insights}, "
-              f"chart={has_chart}, keywords={has_keywords}, summary={has_summary}")
+        app.logger.info(f"Files: sentiment={has_sentiment}, insights={has_insights}, "
+                               f"chart={has_chart}, keywords={has_keywords}, summary={has_summary}")
         
         if not has_sentiment:
-            print("Cannot proceed without sentiment.json")
+            app.logger.error("Cannot proceed without sentiment.json")
             return None
         
         sentiment_data = session_data['sentiment']
@@ -196,8 +106,8 @@ def insert_analysis_data(session_data, date_folder, session_folder, video_name):
         ).first()
         
         if existing_analysis:
-            print(f"Experiment already has analysis (ID: {existing_analysis.id})")
-            print(f"Skipping to avoid duplicates...")
+            app.logger.info(f"Experiment already has analysis (ID: {existing_analysis.id})")
+            app.logger.info(f"Skipping to avoid duplicates...")
             return existing_analysis.id
         
         # 1. Create NlpAnalysis (root) - single record, use ORM
@@ -218,7 +128,7 @@ def insert_analysis_data(session_data, date_folder, session_folder, video_name):
         )
         db.session.add(analysis)
         db.session.flush()  # Get analysis.id
-        print(f"Created NlpAnalysis (ID: {analysis.id})")
+        app.logger.info(f"Created NlpAnalysis (ID: {analysis.id})")
         
         # 2. Create EmotionSummary - single record
         emotion_summary = EmotionSummary(
@@ -228,7 +138,7 @@ def insert_analysis_data(session_data, date_folder, session_folder, video_name):
             primary_emotion_counts=sentiment_summary.get('primary_emotion_counts', {})
         )
         db.session.add(emotion_summary)
-        print(f"Created EmotionSummary")
+        app.logger.info(f"Created EmotionSummary")
         
         # 3. BULK INSERT TimelineSegments using constants
         detailed_analyses = sentiment_data.get('detailed_analyses', [])
@@ -278,7 +188,7 @@ def insert_analysis_data(session_data, date_folder, session_folder, video_name):
         # Bulk insert all segments at once
         if timeline_segments_data:
             db.session.bulk_insert_mappings(TimelineSegment, timeline_segments_data)
-            print(f"Bulk inserted {len(timeline_segments_data)} TimelineSegments")
+            app.logger.info(f"Bulk inserted {len(timeline_segments_data)} TimelineSegments")
         
         # 4. BULK INSERT ChartBins using constants
         if has_chart and 'timeline' in chart_data:
@@ -300,7 +210,7 @@ def insert_analysis_data(session_data, date_folder, session_folder, video_name):
             
             if chart_bins_data:
                 db.session.bulk_insert_mappings(ChartBin, chart_bins_data)
-                print(f" Bulk inserted {len(chart_bins_data)} ChartBins")
+                app.logger.info(f"Bulk inserted {len(chart_bins_data)} ChartBins")
         
         # 5. Create TranscriptSummary - single record
         if has_summary:
@@ -311,7 +221,7 @@ def insert_analysis_data(session_data, date_folder, session_folder, video_name):
                 num_segments=summary_data.get('num_segments', 0)
             )
             db.session.add(transcript_sum)
-            print(f"Created TranscriptSummary")
+            app.logger.info(f"Created TranscriptSummary")
         
         # 6. BULK INSERT Keywords using constants
         if has_keywords:
@@ -330,7 +240,7 @@ def insert_analysis_data(session_data, date_folder, session_folder, video_name):
             
             if keywords_data:
                 db.session.bulk_insert_mappings(Keyword, keywords_data)
-                print(f"Bulk inserted {len(keywords_data)} Keywords")
+                app.logger.info(f"Bulk inserted {len(keywords_data)} Keywords")
         
         # 7. BULK INSERT TopicSentiments using constants
         if has_insights and 'topics' in insights_data:
@@ -351,7 +261,7 @@ def insert_analysis_data(session_data, date_folder, session_folder, video_name):
             
             if topics_data:
                 db.session.bulk_insert_mappings(TopicSentiment, topics_data)
-                print(f"Bulk inserted {len(topics_data)} TopicSentiments")
+                app.logger.info(f"Bulk inserted {len(topics_data)} TopicSentiments")
         
         # 8. BULK INSERT DetectedQuestions using constants
         if has_insights:
@@ -372,7 +282,7 @@ def insert_analysis_data(session_data, date_folder, session_folder, video_name):
             
             if questions_data:
                 db.session.bulk_insert_mappings(DetectedQuestion, questions_data)
-                print(f"Bulk inserted {len(questions_data)} DetectedQuestions")
+                app.logger.info(f"Bulk inserted {len(questions_data)} DetectedQuestions")
         
         # 9. BULK INSERT DetectedActions using constants
         if has_insights:
@@ -392,7 +302,7 @@ def insert_analysis_data(session_data, date_folder, session_folder, video_name):
             
             if actions_data:
                 db.session.bulk_insert_mappings(DetectedAction, actions_data)
-                print(f"Bulk inserted {len(actions_data)} DetectedActions")
+                app.logger.info(f"Bulk inserted {len(actions_data)} DetectedActions")
         
         # 10. Create TextInsight - single record
         if has_insights:
@@ -407,119 +317,18 @@ def insert_analysis_data(session_data, date_folder, session_folder, video_name):
                 avg_word_length=text_stats.get('avg_word_length', 0.0)
             )
             db.session.add(text_insight)
-            print(f"Created TextInsight")
+            app.logger.info(f"Created TextInsight")
         
         # Single commit at the end
         db.session.commit()
-        print(f"\n{'='*70}")
-        print(f"NlpAnalysis ID: {analysis.id} successfully added")
-        print(f"Linked to Experiment: '{experiment.title}' (ID: {experiment.id})")
-        print(f"{'='*70}")
+        app.logger.info(f"✓ NlpAnalysis ID: {analysis.id} successfully added")
+        app.logger.info(f"✓ Linked to Experiment: '{experiment.title}' (ID: {experiment.id})")
         
         return analysis.id
         
     except Exception as e:
         db.session.rollback()
-        print(f"\nError: {str(e)}")
+        app.logger.error(f"Error inserting analysis data: {str(e)}")
         import traceback
-        traceback.print_exc()
+        app.logger.error(traceback.format_exc())
         return None
-
-
-def main():
-    """Main import function - Auto-links everything to experiments"""
-    print("\n" + "="*80)
-    print("MINIO → DATABASE IMPORT (AUTO-LINKING TO EXPERIMENTS)")
-    print("="*80)
-    
-    bucket_name = "tastelab-videos-processed"
-    
-    print("\n1. Discovering sessions...")
-    sessions = list_sessions(bucket_name)
-    
-    if not sessions:
-        print("No sessions found!")
-        return
-    
-    print(f"\n  Found {len(sessions)} session(s):")
-    for i, (session_key, videos) in enumerate(sessions.items(), 1):
-        print(f"    {i}. {session_key} ({len(videos)} videos)")
-    
-    # Select first real session
-    real_sessions = [(k, v) for k, v in sessions.items() 
-                     if not k.startswith('test_data')]
-    
-    if real_sessions:
-        session_key, video_names = real_sessions[0]
-    else:
-        session_key, video_names = list(sessions.items())[0]
-    
-    date_folder, session_folder = session_key.split('/')
-    
-    print(f"\n2. Selected: {session_key} ({len(video_names)} videos)")
-    
-    print("\n3. Preparing database...")
-    with app.app_context():
-        db.create_all()
-        print("✓ Tables ready")
-        
-        exp_count = Experiment.query.count()
-        print(f"✓ Current experiments in database: {exp_count}")
-        
-        print(f"\n4. Importing data (will auto-create/link experiments)...")
-        
-        success_count = 0
-        created_experiments = 0
-        linked_existing = 0
-        
-        for video_name in video_names:
-            print(f"\n{'─'*70}")
-            print(f"Video: {video_name}")
-            
-            exp_count_before = Experiment.query.count()
-            
-            session_data = load_session_data(bucket_name, date_folder, 
-                                            session_folder, video_name)
-            
-            if not session_data:
-                continue
-            
-            analysis_id = insert_analysis_data(session_data, date_folder, 
-                                              session_folder, video_name)
-            
-            if analysis_id:
-                success_count += 1
-                
-                exp_count_after = Experiment.query.count()
-                if exp_count_after > exp_count_before:
-                    created_experiments += 1
-                else:
-                    linked_existing += 1
-                
-                analysis = NlpAnalysis.query.get(analysis_id)
-                print(f"\nSummary:")
-                print(f"  • Experiment: {analysis.experiment.title}")
-                print(f"  • Dominant Emotion: {analysis.dominant_emotion}")
-                print(f"  • Segments: {len(list(analysis.timeline_segments))}")
-                print(f"  • Questions: {len(list(analysis.questions))}")
-    
-    print("\n" + "="*80)
-    print(f"IMPORT COMPLETE")
-    print(f"  • Analyses imported: {success_count}/{len(video_names)}")
-    print(f"  • New experiments created: {created_experiments}")
-    print(f"  • Linked to existing: {linked_existing}")
-    print("="*80)
-    
-    if success_count > 0:
-        print("\nView your data at:")
-        print("  • Home: http://localhost:5000/")
-        print("  • Experiments: http://localhost:5000/experiments")
-        print("  • Analysis Details: http://localhost:5000/transcription")
-    print()
-
-
-if __name__ == "__main__":
-    print("\nStarting MinIO Import...")
-    print("This will automatically create or link to experiments!")
-    print("="*80)
-    main()

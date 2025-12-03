@@ -45,16 +45,34 @@ class Experiment(db.Model):
         return f"<Experiment {self.title}>"
 
     def format_duration(self):
-        if self.duration is None:
+        # First try to use the stored duration
+        duration_value = self.duration
+        
+        # If no stored duration, calculate from analysis data
+        if duration_value is None:
+            duration_value = self.calculated_duration
+        
+        # If still no duration, return N/A
+        if duration_value is None:
             return "N/A"
-        hours = self.duration // 60
-        minutes = self.duration % 60
+            
+        hours = duration_value // 60
+        minutes = duration_value % 60
         if hours > 0 and minutes > 0:
             return f"{hours}h {minutes}min"
         elif hours > 0:
             return f"{hours}h"
         else:
             return f"{minutes}min"
+    
+    @property
+    def calculated_duration(self):
+        if self.analysis and self.analysis.timeline_segments.count() > 0:
+            segments = self.analysis.timeline_segments.all()
+            if segments:
+                total_duration = max(seg.end_time for seg in segments)
+                return int(total_duration / 60)
+        return None
 
 
 class NlpAnalysis(db.Model):
