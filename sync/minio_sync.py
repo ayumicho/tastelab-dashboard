@@ -1,6 +1,6 @@
 import time
 from datetime import datetime
-from app import app
+from main import app
 from models import db, NlpAnalysis, Experiment
 from sync.minio_service import MinIOService
 from sync.data_import import insert_analysis_data

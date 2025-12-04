@@ -1,5 +1,5 @@
 from datetime import datetime
-from app import app
+from main import app
 from models import (
     db, NlpAnalysis, EmotionSummary, TimelineSegment, ChartBin,
     TranscriptSummary, Keyword, TopicSentiment, DetectedQuestion,

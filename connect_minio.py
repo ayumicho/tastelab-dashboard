@@ -1,6 +1,6 @@
 from sync.data_import import insert_analysis_data, find_or_create_experiment
 import json
-from app import app
+from main import app
 from minio import Minio
 from datetime import datetime
 from models import (db, NlpAnalysis, EmotionSummary, TimelineSegment, ChartBin,
