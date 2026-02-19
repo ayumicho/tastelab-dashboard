@@ -44,8 +44,8 @@ Make sure you have the following installed on your system:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/BredaUniversityADSAI/2025-26ab-fai3-specialisation-project-team-tastelab
-   cd 2025-26ab-fai3-specialisation-project-team-tastelab
+   git clone https://github.com/ayumicho/tastelab-dashboard.git
+   cd tastelab-dashboard
    ```
 
 2. **Create a virtual environment**
@@ -65,16 +65,12 @@ Make sure you have the following installed on your system:
    source flask_env/bin/activate
    ```
 
-4. **Path to the project directory**
-   ```bash
-   cd dashboard
-   ```
-
-5. **Install required packages**
+4. **Install required packages**
    ```bash
    pip install -r requirements.txt
    ```
-6. **Database Configuration** 
+
+5. **Database Configuration** 
 
 Update ``SQLALCHEMY_DATABASE_URI`` in config.py with your local PostgreSQL credentials:
 
@@ -92,7 +88,7 @@ postgresql://username:password@localhost:5432/tastelab
 ## Project Structure
 
 ```
-/dashboard/
+tastelab-dashboard/
 ├── docs/                                       # Technical documentation
 │   └── README.md                               # Documentation guide
 │   └── technical_report_dashboard.pdf          # Comprehensive technical report
@@ -165,7 +161,7 @@ The project uses the following main packages:
 - **Werkzeug 3.1.3**
 - **Click 8.2.1**
 
-For a complete list, see [`requirements.txt`](https://github.com/BredaUniversityADSAI/2025-26ab-fai3-specialisation-project-team-tastelab/requirements.txt).
+For a complete list, see [`requirements.txt`](https://github.com/ayumicho/tastelab-dashboard/requirements.txt).
 
 ## Development
 
@@ -251,9 +247,9 @@ The application is containerized using Docker and is hosted on a private BUas se
     ```
 
 ## License
-Distributed under the MIT License. See [LICENSE](https://github.com/BredaUniversityADSAI/2025-26ab-fai3-specialisation-project-team-tastelab/tree/main/dashboard/LICENSE) for more information.
+Distributed under the MIT License. See [LICENSE](https://github.com/ayumicho/tastelab-dashboard/tree/main/LICENSE) for more information.
 ---
 
 **Last Updated:** January 2026
 
-**Maintained by:** Ayumi Chotoe
+**Maintained by:** Ayumi Cho
