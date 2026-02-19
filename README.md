@@ -37,7 +37,6 @@ The first load may take a moment if the Render instance has spun down due to ina
 | ETL pipeline | Automated 24h sync + manual trigger | Removed |
 | Database | On-premise PostgreSQL | Supabase (hosted PostgreSQL) |
 | Hosting | BUas internal server (campus/VPN only) | Render (publicly accessible) |
-| Video streams | Live synchronized camera feeds | Sample/static assets |
 
 ## Getting Started
 
