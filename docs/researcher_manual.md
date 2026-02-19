@@ -69,4 +69,4 @@ For detailed technical documentation, refer to the [Technical Report](../docs/te
 ---
 **Last Updated:** January 2026
 
-**Maintained by:** Ayumi Chotoe
+**Maintained by:** Ayumi Cho

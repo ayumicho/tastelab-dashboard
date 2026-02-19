@@ -62,4 +62,4 @@ url_for('static', filename='images/filename.png')
 ---
 
 **Last Updated:** January 2026
-**Maintained by:** Ayumi Chotoe
+**Maintained by:** Ayumi Cho

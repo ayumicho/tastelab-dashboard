@@ -59,4 +59,4 @@ If you have uploaded new files to MinIO and they do not appear in the dashboard:
 
 **Last Updated:** January 2026
 
-**Maintained by:** Ayumi Chotoe
+**Maintained by:** Ayumi Cho
