@@ -16,11 +16,6 @@
                 <p class="dashboard-subtitle">Browse, analyze, and manage sensory testing experiments</p>
             </div>
             <div class="header-actions">
-                <form id="syncForm" method="POST" action="{{ url_for('views.manual_sync') }}" style="display: inline;">
-                    <button type="submit" class="btn btn-secondary" title="Sync Data">
-                        <i class="fas fa-sync"></i> Sync Data
-                    </button>
-                </form>
                 <button class="btn btn-primary" onclick="location.href='/experiments/add-experiment'">
                     <i class="fas fa-plus"></i> New Experiment
                 </button>
@@ -320,11 +315,6 @@
             {% endif %}
         </div>    
     </div>
-</div>
-
-<div class="loading-overlay" id="syncOverlay">
-    <div class="loading-spinner"></div>
-    <p class="loading-text">Syncing with MinIO...</p>
 </div>
 
 <script>

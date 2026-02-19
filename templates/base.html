@@ -139,18 +139,6 @@
                             <div class="sidebar-divider"></div>
 
                             <li class="nav-item">
-                                <a class="nav-link" id="manual-annotation" href="/manual-annotation">
-                                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                        <circle cx="9" cy="7" r="4"></circle>
-                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                                    </svg>
-                                    Manual Annotation
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
                                 <a class="nav-link" id="detection-tracking" href="/detection-tracking">
                                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <circle cx="12" cy="12" r="10"/>
@@ -296,18 +284,6 @@
             $('#profile').addClass('active');
         } else if (currentPath === '/help') {
             $('#help').addClass('active');
-        }
-    
-        // --- SYNC LOGIC ---
-        const syncForm = document.getElementById('syncForm');
-        const syncOverlay = document.getElementById('syncOverlay');
-        const syncBtnIcon = syncForm ? syncForm.querySelector('.fa-sync') : null;
-
-        if (syncForm && syncOverlay) {
-            syncForm.addEventListener('submit', function(e) {
-                syncOverlay.classList.add('active');
-                if(syncBtnIcon) syncBtnIcon.classList.add('fa-spin');
-            });
         }
     </script>
 

@@ -15,27 +15,21 @@
         <div class="header-content">
             <div class="dashboard-section">
                 <h1 class="dashboard-title">Help Center</h1>
-                <p class="dashboard-subtitle">Guides, workflows, and support for the TasteLab platform.</p>
+                <p class="dashboard-subtitle">Guides and support for the TasteLab platform.</p>
             </div>
             
             <div class="search-wrapper">
                 <i class="fas fa-search search-icon-inside"></i>
-                <input type="text" id="helpSearch" class="search-input" placeholder="Search (e.g. 'Sync', 'Labeling', 'Privacy')...">
+                <input type="text" id="helpSearch" class="search-input" placeholder="Search (e.g. 'Heatmap', 'Emotions', 'Privacy')...">
             </div>
         </div>
     </div>
         
     <div class="help-topic-grid">
-        <a href="#data-sync" class="topic-card orange">
-            <div class="topic-icon"><i class="fas fa-sync"></i></div>
-            <div class="topic-title">Data & Syncing</div>
-            <div class="topic-desc">How to retrieve video data from external storage.</div>
-        </a>
-        
-        <a href="#manual-annotation-guide" class="topic-card deep">
-            <div class="topic-icon"><i class="fas fa-tags"></i></div>
-            <div class="topic-title">Manual Annotation</div>
-            <div class="topic-desc">Vital steps for training the tracking model.</div>
+        <a href="#about-demo" class="topic-card orange">
+            <div class="topic-icon"><i class="fas fa-info-circle"></i></div>
+            <div class="topic-title">About This Demo</div>
+            <div class="topic-desc">How this portfolio version works and what data is shown.</div>
         </a>
         
         <a href="#analysis-results" class="topic-card light">
@@ -43,11 +37,17 @@
             <div class="topic-title">Analysis & Results</div>
             <div class="topic-desc">Interpreting heatmaps and sentiment graphs.</div>
         </a>
+
+        <a href="#features" class="topic-card deep">
+            <div class="topic-icon"><i class="fas fa-flask"></i></div>
+            <div class="topic-title">Features</div>
+            <div class="topic-desc">Overview of what TasteLab can do.</div>
+        </a>
         
         <a href="#troubleshooting" class="topic-card coral">
             <div class="topic-icon"><i class="fas fa-life-ring"></i></div>
             <div class="topic-title">FAQ & Support</div>
-            <div class="topic-desc">Common questions and processing delays.</div>
+            <div class="topic-desc">Common questions about the platform.</div>
         </a>
 
         <a href="#legal-compliance" class="topic-card slate">
@@ -57,112 +57,84 @@
         </a>
     </div>
 
-    <div id="data-sync" class="faq-section content-card">
+    <!-- About This Demo -->
+    <div id="about-demo" class="faq-section content-card">
         <div class="section-header">
-            <i class="fas fa-database"></i>
-            <h2>Data Synchronization</h2>
+            <i class="fas fa-info-circle"></i>
+            <h2>About This Demo</h2>
         </div>
-        <div class="accordion" id="accordionSync">
+        <div class="accordion" id="accordionDemo">
             <div class="accordion-item search-item">
                 <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#syncOne">
-                        Where is my data?
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#demoOne">
+                        What am I looking at?
                     </button>
                 </h2>
-                <div id="syncOne" class="accordion-collapse collapse" data-bs-parent="#accordionSync">
+                <div id="demoOne" class="accordion-collapse collapse show" data-bs-parent="#accordionDemo">
                     <div class="accordion-body">
-                        <p>All video and sensor data is securely stored on an external platform (MinIO). The dashboard does not hold this data automatically.</p>
-                        <p>To view your latest experiments, you must <strong>retrieve</strong> the data:</p>
-                        <ol>
-                            <li>Locate the <strong>Sync Data</strong> button (usually found in the experiment overview <i class="fas fa-sync"></i>).</li>
-                            <li>Click the button once.</li>
-                            <li>The system will fetch new data from MinIO and populate the local database.</li>
-                        </ol>
+                        <p>This is a <strong>portfolio demo</strong> of the TasteLab Dashboard — a research analytics platform built for Breda University of Applied Sciences (BUas).</p>
+                        <p>The original system processed live multimodal data (video, audio, sensor streams) from a physical sensory research lab. In this demo version:</p>
+                        <ul>
+                            <li>All data is <strong>pre-loaded sample data</strong> based on real experiment structures.</li>
+                            <li>The ETL pipeline connecting to the university's storage server has been removed.</li>
+                            <li>The dashboard is hosted publicly on <strong>Render</strong> with a <strong>Supabase</strong> PostgreSQL database.</li>
+                        </ul>
                         <div class="note-box">
-                            <i class="fas fa-info-circle"></i> <strong>Note:</strong> The system also performs an automatic sync every 24 hours. If you just finished an experiment, use the manual button to see it immediately.
+                            <i class="fas fa-info-circle"></i> <strong>Note:</strong> Because this is sample data, you cannot add live experiments or sync new video data. The "Add Experiment" form is available to explore the UI.
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item search-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#demoTwo">
+                        What was removed from the original system?
+                    </button>
+                </h2>
+                <div id="demoTwo" class="accordion-collapse collapse" data-bs-parent="#accordionDemo">
+                    <div class="accordion-body">
+                        <p>The following features exist in the full BUas version but are not included in this demo:</p>
+                        <ul>
+                            <li><strong>MinIO ETL Pipeline:</strong> Automated sync from the university's object storage server.</li>
+                            <li><strong>Manual Annotation:</strong> A labeling interface used to train the person re-identification model.</li>
+                            <li><strong>Live Video Streams:</strong> Synchronized feeds from 6 cameras in the research lab.</li>
+                            <li><strong>Dagster Processing Pipeline:</strong> Background orchestration for video and audio analysis.</li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="manual-annotation-guide" class="faq-section content-card">
+    <!-- Features -->
+    <div id="features" class="faq-section content-card">
         <div class="section-header">
-            <i class="fas fa-user-tag"></i>
-            <h2>Manual Annotation User Guide</h2>
+            <i class="fas fa-star"></i>
+            <h2>Features</h2>
         </div>
-        <div class="intro-text mb-4">
-            <p>If your experiment involves Computer Vision (Detection & Tracking), you <strong>must</strong> manually label participants before the system can generate heatmaps or movement data.</p>
-        </div>
-
-        <div class="accordion" id="accordionAnnotation">
+        <div class="accordion" id="accordionFeatures">
             <div class="accordion-item search-item">
                 <h2 class="accordion-header">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#annoOne">
-                        Step-by-Step Labeling Guide
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#featOne">
+                        What can I explore in this demo?
                     </button>
                 </h2>
-                <div id="annoOne" class="accordion-collapse collapse show" data-bs-parent="#accordionAnnotation">
+                <div id="featOne" class="accordion-collapse collapse" data-bs-parent="#accordionFeatures">
                     <div class="accordion-body">
-                        <div class="step-list">
-                            <div class="step-item">
-                                <div class="step-number">1</div>
-                                <div class="step-content">
-                                    <strong>Start the Job</strong>
-                                    <p>Go to the Manual Annotation page. Find your experiment under "Pending Jobs" and click "Start Labeling".</p>
-                                </div>
-                            </div>
-                            <div class="step-item">
-                                <div class="step-number">2</div>
-                                <div class="step-content">
-                                    <strong>Set Participant Count (Critical)</strong>
-                                    <p>A popup will ask for the number of participants. You must enter the <strong>exact number</strong> of people who were in the room.</p>
-                                    <p class="text-danger small"><i class="fas fa-exclamation-triangle"></i> Incorrect counts will corrupt the tracking data.</p>
-                                </div>
-                            </div>
-                            <div class="step-item">
-                                <div class="step-number">3</div>
-                                <div class="step-content">
-                                    <strong>Assign Identities</strong>
-                                    <p>You will see a series of images (crops). Determine who the person is and assign them a number (e.g., Person 1, Person 2).</p>
-                                    <ul>
-                                        <li><strong>Consistency is key:</strong> The person you label as "Person 1" in the first image must be "Person 1" in all subsequent images.</li>
-                                        <li>Do not group different people into the same ID.</li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="step-item">
-                                <div class="step-number">4</div>
-                                <div class="step-content">
-                                    <strong>Training the Model</strong>
-                                    <p>Once you finish labeling, the data is sent to our processing pipeline (Dagster). The AI model will train on your inputs to learn who is who.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="accordion-item search-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#annoTwo">
-                        When will I see the results?
-                    </button>
-                </h2>
-                <div id="annoTwo" class="accordion-collapse collapse" data-bs-parent="#accordionAnnotation">
-                    <div class="accordion-body">
-                        <p>After you finish manual labeling, the system needs time to process the video and generate the tracking paths.</p>
-                        <div class="alert-box warning">
-                            <i class="fas fa-clock"></i> <strong>Processing Time:</strong> This process typically takes up to 1/2 hours.
-                        </div>
-                        <p>Once the processing is complete, the data will be available in MinIO. You will need to click the <strong>Sync Data</strong> button again to pull the final tracking results into your dashboard.</p>
+                        <ul>
+                            <li><strong>Experiments Dashboard:</strong> Browse, filter, and manage sensory research sessions.</li>
+                            <li><strong>Speech-to-Text Analysis:</strong> View AI-generated transcripts, summaries, detected questions, action items, and emotion timelines.</li>
+                            <li><strong>Detection & Tracking:</strong> Explore movement heatmaps and participant tracking across camera zones with a playback timeline.</li>
+                            <li><strong>Single Experiment View:</strong> A combined overview of both speech analysis and tracking data for any experiment.</li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Analysis & Results -->
     <div id="analysis-results" class="faq-section content-card">
         <div class="section-header">
             <i class="fas fa-chart-area"></i>
@@ -177,12 +149,12 @@
                 </h2>
                 <div id="analOne" class="accordion-collapse collapse" data-bs-parent="#accordionAnalysis">
                     <div class="accordion-body">
-                        <p>The heatmap visualizes the density of movement in the room based on the manual labeling you performed.</p>
+                        <p>The heatmap visualizes movement density in the research room based on tracking data across 4 camera zones.</p>
                         <ul>
-                            <li><span style="color:#e53e3e; font-weight:bold;">Red Areas:</span> High traffic. Participants spent a lot of time here.</li>
-                            <li><span style="color:#38a169; font-weight:bold;">Green/Blue Areas:</span> Low traffic. Participants passed through quickly.</li>
+                            <li><span style="color:#e53e3e; font-weight:bold;">Red Areas:</span> High traffic — participants spent a lot of time here.</li>
+                            <li><span style="color:#38a169; font-weight:bold;">Green/Blue Areas:</span> Low traffic — participants passed through quickly.</li>
                         </ul>
-                        <p>Use the <strong>Timeline Slider</strong> at the bottom of the tracking page to replay the movement and see where people were at specific timestamps.</p>
+                        <p>Use the <strong>Timeline Slider</strong> at the bottom of the tracking page to replay movement and see where participants were at specific timestamps.</p>
                     </div>
                 </div>
             </div>
@@ -194,18 +166,20 @@
                 </h2>
                 <div id="analTwo" class="accordion-collapse collapse" data-bs-parent="#accordionAnalysis">
                     <div class="accordion-body">
-                        <p>If audio was recorded, the dashboard uses NLP (Natural Language Processing) to determine the emotional tone of the conversation.</p>
+                        <p>The dashboard uses NLP (Natural Language Processing) to determine the emotional tone of the recorded conversation from each experiment.</p>
                         <ul>
                             <li><i class="fas fa-circle text-success"></i> <strong>Positive:</strong> Happy, Excited, Grateful.</li>
                             <li><i class="fas fa-circle text-danger"></i> <strong>Negative:</strong> Angry, Disgusted, Worried.</li>
                             <li><i class="fas fa-circle text-secondary"></i> <strong>Neutral:</strong> Standard conversation.</li>
                         </ul>
+                        <p>The Speech-to-Text page shows a full timeline of these emotions per transcript segment.</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
+
+    <!-- Legal -->
     <div id="legal-compliance" class="faq-section content-card">
         <div class="section-header">
             <i class="fas fa-scale-balanced"></i>
@@ -236,10 +210,54 @@
         </div>
     </div>
 
-    <div id="troubleshooting" class="support-footer">
-        <h3>Still having trouble?</h3>
-        <p>If data is not appearing after 24 hours, ensure you have clicked the "Sync" button. (<i class="fas fa-sync"></i>) </p>
+    <!-- FAQ -->
+    <div id="troubleshooting" class="faq-section content-card">
+        <div class="section-header">
+            <i class="fas fa-question-circle"></i>
+            <h2>FAQ</h2>
+        </div>
+        <div class="accordion" id="accordionFAQ">
+            <div class="accordion-item search-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqOne">
+                        Why is data not loading?
+                    </button>
+                </h2>
+                <div id="faqOne" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                    <div class="accordion-body">
+                        <p>The demo is hosted on Render's free tier, which may spin down after inactivity. The first page load can take up to 30 seconds while the server wakes up. If data still doesn't appear after that, try refreshing the page.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item search-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqTwo">
+                        Can I add my own experiments?
+                    </button>
+                </h2>
+                <div id="faqTwo" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                    <div class="accordion-body">
+                        <p>You can use the "Add Experiment" form to create a basic experiment entry. However, speech analysis and tracking data require the full processing pipeline which is only available in the original BUas deployment.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item search-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqThree">
+                        Where can I find the source code?
+                    </button>
+                </h2>
+                <div id="faqThree" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                    <div class="accordion-body">
+                        <p>The portfolio version of this project is available on GitHub. Visit <a href="https://github.com/ayumicho/tastelab-dashboard" target="_blank">github.com/ayumicho/tastelab-dashboard</a> to explore the codebase.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
 </div>
 
 <script>
@@ -253,7 +271,6 @@
             let text = item.textContent.toLowerCase();
             if (text.includes(filter)) {
                 item.style.display = "";
-                // Auto-expand accordion if searching specific terms
                 if(filter.length > 2) {
                     let collapseDiv = item.querySelector('.accordion-collapse');
                     if(collapseDiv && !collapseDiv.classList.contains('show')) {
@@ -265,29 +282,17 @@
             }
         });
 
-        // Hide empty sections
         cards.forEach(card => {
             let visibleItems = card.querySelectorAll('.search-item[style=""]');
-            
-            // Check if card has .legal-card items (Legal section has different structure)
             let legalItems = card.querySelectorAll('.legal-card');
             
-            // If it's a regular FAQ card
             if (visibleItems.length > 0) {
-                 if (filter !== "" && visibleItems.length === 0) {
-                    card.style.display = "none";
-                } else {
-                    card.style.display = "block";
-                }
-            } 
-            // If it's the legal card, simple text search on the card text
-            else if (legalItems.length > 0) {
-                 let text = card.textContent.toLowerCase();
-                 if (text.includes(filter)) {
-                     card.style.display = "block";
-                 } else if (filter !== "") {
-                     card.style.display = "none";
-                 }
+                card.style.display = "block";
+            } else if (legalItems.length > 0) {
+                let text = card.textContent.toLowerCase();
+                card.style.display = text.includes(filter) ? "block" : (filter !== "" ? "none" : "block");
+            } else if (filter !== "") {
+                card.style.display = "none";
             }
         });
     });

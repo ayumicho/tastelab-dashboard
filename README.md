@@ -3,6 +3,9 @@
 A Flask-based research analytics platform that transforms unstructured experimental data into meaningful insights through intelligent visualizations and analysis. The dashboard helps researchers make sense of complex multimodal data by providing powerful tools for speech analysis and people tracking across synchronized video streams.
 
 **Project Duration:** September 1, 2025 - January 23, 2026
+
+>**Note:** This is a portfolio demo version of the TasteLab Dashboard. The original system was developed for Breda University of Applied Sciences (BUas) and relied on a private MinIO storage server and an internal ETL pipeline that are not accessible outside the university network. In this version, the ETL pipeline has been removed and the database has been pre-populated with sample data so that the dashboard can be explored freely.
+
 ## Overview
 
 The TasteLab Dashboard bridges the gap between raw data collection and academic research by automating complex analysis workflows. It specifically addresses challenges such as limited student accessibility, inefficient manual data merging from wearables, and the labor-intensive nature of manual annotation. 
@@ -17,17 +20,24 @@ The TasteLab Dashboard bridges the gap between raw data collection and academic 
 - **Multi-Camera View:** Process and analyze synchronized video streams from multiple camera angles
 - **Research-Friendly UI:** Designed for non-technical researchers with modern, intuitive interface
 
-## Network Requirements & Hosting
-The TasteLab Dashboard is hosted on a private BUas internal server. Because it handles sensitive research data and heavy video streams, it is not accessible via the open internet.
+## Live Demo
+The portfolio version is publicly hosted and requires no setup to explore:
 
-- **On-Premise:** You must be physically on the BUas campus and connected to the Eduroam or local faculty network.
-- **Remote (Working from Home):** 1. Connect via a VPN (e.g., FortiClient). 2. Ensure you have added BUas to the VPN routing; otherwise, the internal server IP will not resolve in your browser.
+Live Demo -> 
+- Hosted on: [Render](http://render.com/)
+- Database: [Supabase](http://supabase.com/) (PostgreSQL), pre-populated with sample experiment data
 
-## Data Connectivity & ETL Pipeline
-The dashboard relies on an automated ETL (Extract, Transform, Load) pipeline to fetch data from the MinIO storage server.
+The first load may take a moment if the Render instance has spun down due to inactivity. This is expected on the free tier. Once loaded, you can navigate through the dashboard and explore the various features using the sample data.
 
-- **Automatic Sync:** The pipeline automatically refreshes every 24 hours.
-- **Manual Sync:** If your experiment data is not showing up, click the "Sync Minio" button (or the 🔄 icon) in the dashboard. This will manually trigger the pipeline and retrieve your data in seconds.
+## Portfolio vs. Original Version
+
+| Feature | Original (BUas) | Portfolio Demo |
+|---|---|---|
+| Data source | MinIO object storage (BUas server) | Pre-loaded sample data |
+| ETL pipeline | Automated 24h sync + manual trigger | Removed |
+| Database | On-premise PostgreSQL | Supabase (hosted PostgreSQL) |
+| Hosting | BUas internal server (campus/VPN only) | Render (publicly accessible) |
+| Video streams | Live synchronized camera feeds | Sample/static assets |
 
 ## Getting Started
 
@@ -38,7 +48,7 @@ Follow these instructions to get the project running on your local machine for d
 Make sure you have the following installed on your system:
 - [**Python 3.7+**](https://python.org/downloads/)
 - [**Git**](https://git-scm.com/downloads/)
-- [**PostgreSQL**](https://www.postgresql.org/download/)
+- [**PostgreSQL**](https://www.postgresql.org/download/)(or a Supabase project)
 
 ### Installation
 
@@ -70,20 +80,26 @@ Make sure you have the following installed on your system:
    pip install -r requirements.txt
    ```
 
-5. **Database Configuration** 
+5. **Database Configuration**
 
-Update ``SQLALCHEMY_DATABASE_URI`` in config.py with your local PostgreSQL credentials:
+   Update `SQLALCHEMY_DATABASE_URI` in `config.py` with your PostgreSQL or Supabase credentials:
 
-```bash
-postgresql://username:password@localhost:5432/tastelab
-```
+   ```python
+   # Local PostgreSQL
+   postgresql://username:password@localhost:5432/tastelab
 
-7. **Run the application**
+   # Supabase (replace with your project connection string)
+   postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres
+   ```
+
+   Alternatively, set a `DATABASE_URL` environment variable to avoid changing the code directly.
+
+6. **Run the application**
    ```bash
    python main.py
    ```
 
-   The application should now be running at `http://127.0.0.1:5000/` on your local machine.
+   The application should now be running at `http://127.0.0.1:5000/` locally.
 
 ## Project Structure
 
@@ -140,17 +156,21 @@ tastelab-dashboard/
 └── view.py                                     # View functions
 
 ```
+> **Note:** The `sync/` directory containing the ETL pipeline has been removed from this portfolio version, as it depended on the BUas MinIO server which is not accessible externally.
+
+---
 
 ## Architecture & Code Organization
 
 The application follows a modular Flask architecture:
 
-* **`views.py`**: Handles the application routing and logic. It defines the Blueprints, manages URL endpoints (like `/experiments`, `/profile`), and connects the frontend templates to the backend data.
-* **`models.py`**: Defines the database schema using SQLAlchemy. It represents the data structure (Users, Experiments, NLP Analysis) as Python classes.
-* **`db_names.py`**: A centralized configuration file containing constant strings for table and column names. This ensures consistency across the application and makes refactoring database schema names safer and easier.
-* **`sync/`**: Contains the ETL (Extract, Transform, Load) pipeline logic. This module is responsible for fetching raw JSON/video data from the MinIO storage server, transforming it, and loading it into the local PostgreSQL database.
+- **`views.py`**: Handles application routing and logic. Defines Blueprints, manages URL endpoints (e.g. `/experiments`, `/profile`), and connects frontend templates to the backend.
+- **`models.py`**: Defines the database schema using SQLAlchemy, representing data structures (Users, Experiments, NLP Analysis) as Python classes.
+- **`db_names.py`**: A centralized configuration file for table and column name constants, ensuring consistency and safer schema refactoring.
 
-> **Note:** Detailed documentation for specific modules can be found in `README.md` files located within their respective subdirectories (e.g., `/sync/README.md`).
+> Detailed documentation for specific modules can be found in `README.md` files within their respective subdirectories.
+
+---
 
 ## Dependencies
 
@@ -163,6 +183,8 @@ The project uses the following main packages:
 
 For a complete list, see [`requirements.txt`](https://github.com/ayumicho/tastelab-dashboard/requirements.txt).
 
+---
+
 ## Development
 
 ### Running in Development Mode
@@ -174,37 +196,13 @@ export FLASK_ENV=development  # On Windows use: set FLASK_ENV=development
 python main.py
 ```
 
-### Database Configuration
-
-By default, the application looks for a PostgreSQL database. To run the dashboard locally with full functionality:
-
-1.  **Install PostgreSQL:** Download and install [PostgreSQL](https://www.postgresql.org/download/).
-2.  **Create a Database:** Create a new local database (e.g., named `tastelab`).
-3.  **Configure Connection:**
-    * Open `config.py`.
-    * Locate the `SQLALCHEMY_DATABASE_URI` variable.
-    * Update the string to match your local credentials:
-        ```python
-        # format: postgresql://username:password@localhost:5432/database_name
-        SQLALCHEMY_DATABASE_URI = os.getenv(
-            'DATABASE_URL',
-            'postgresql://postgres:your_password@localhost:5432/tastelab'
-        )
-        ```
-    * Alternatively, you can set a `DATABASE_URL` environment variable to avoid changing the code.
-
 ### Making Changes
 
 1. Make your changes to the code
 2. The development server will automatically reload when you save files
 3. Refresh your browser to see the changes
 
-## Usage
-
-1. Start the application using the installation steps above
-2. Open your web browser and navigate to `http://127.0.0.1:5000/`
-3. You should see the TasteLab dashboard interface
-
+---
 
 ## Troubleshooting
 
@@ -215,16 +213,19 @@ By default, the application looks for a PostgreSQL database. To run the dashboar
 - Try using `python3` instead of `python`
 
 **Issue: `pip: command not found`**
-- Make sure pip is installed with Python
 - Try using `python -m pip` instead of `pip`
 
 **Issue: Permission denied errors**
-- Make sure you have activated your virtual environment
-- On Linux/Mac, you might need to use `python3` and `pip3`
+- Make sure your virtual environment is activated
+- On Linux/Mac, you may need to use `python3` and `pip3`
 
 **Issue: Port already in use**
-- The default port 5000 might be occupied
+- The default port 5000 may be occupied
 - Try running on a different port: `python main.py --port 5001`
+
+**Issue: Database connection failed**
+- Double-check your `SQLALCHEMY_DATABASE_URI` or `DATABASE_URL` environment variable
+- Ensure your Supabase project is active and the connection string is correct
 
 ### Getting Help
 
@@ -235,21 +236,26 @@ If you encounter any issues:
 4. Check Flask installation: `flask --version`
 5. Review error messages in the terminal for clues
 
-## Docker Deployment
-
-The application is containerized using Docker and is hosted on a private BUas server.
-
-* **Entry Point:** `main_docker.py` is configured specifically for the containerized environment (binds to `0.0.0.0` on port `3139`).
-* **Running with Docker:**
-    Ensure Docker is installed, then build and run using Docker Compose:
-    ```bash
-    docker-compose up --build -d
-    ```
-
-## License
-Distributed under the MIT License. See [LICENSE](https://github.com/ayumicho/tastelab-dashboard/tree/main/LICENSE) for more information.
 ---
 
-**Last Updated:** January 2026
+## Docker Deployment
+
+The application is containerized using Docker.
+
+- **Entry Point:** `main_docker.py` is configured for the containerized environment (binds to `0.0.0.0` on port `3139`).
+- **Running with Docker:**
+  ```bash
+  docker-compose up --build -d
+  ```
+
+---
+
+## License
+
+Distributed under the MIT License. See [LICENSE](https://github.com/ayumicho/tastelab-dashboard/tree/main/LICENSE) for more information.
+
+---
+
+**Last Updated:** February 2026
 
 **Maintained by:** Ayumi Cho

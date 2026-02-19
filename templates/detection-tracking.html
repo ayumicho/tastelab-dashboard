@@ -27,13 +27,6 @@
                 <i class="fas fa-filter"></i>
                 <h3>Select Experiment to View</h3>
             </div>
-            <div class="overview-actions">
-                <form id="syncForm" method="POST" action="{{ url_for('views.manual_sync') }}" style="display: inline;">
-                    <button type="submit" class="btn-icon" title="Sync Data">
-                        <i class="fas fa-sync"></i>
-                    </button>
-                </form>
-            </div>
         </div>
         <div class="overview-content">
             <div class="experiment-dropdown" id="experimentSelect">
@@ -220,11 +213,6 @@
         <p style="color: #64748b;">Please select an experiment with processed tracking data to view the visualization.</p>
     </div>
     {% endif %}
-</div>
-
-<div class="loading-overlay" id="syncOverlay">
-    <div class="loading-spinner"></div>
-    <p class="loading-text">Syncing with MinIO...</p>
 </div>
 
 <script>
