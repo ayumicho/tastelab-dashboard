@@ -21,8 +21,8 @@ def login():
             # Check is password is correct
             if check_password_hash(user.password, password):
                 flash("Logged in successfully!", category="success")
-                login_user(user, remember=True)
-                return redirect(url_for("views.home"))  # Redirect user to home
+                login_user(user)
+                return redirect(url_for("views.home"))
             else:
                 flash("Incorrect password, try again", category="error")
         else:
@@ -35,8 +35,9 @@ def login():
 @auth.route("/logout")
 @login_required
 def logout():
-    logout_user()  # log the user out
-    return redirect(url_for("auth.login"))  # redirect to login page
+    logout_user()
+    flash("You have been logged out successfully.")
+    return redirect(url_for("auth.login"))
 
 
 # Sign up route, with both GET and POST methods
@@ -73,9 +74,9 @@ def sign_up():
             )
             db.session.add(new_user)
             db.session.commit()
-            login_user(new_user, remember=True)  # log new user in
+            login_user(new_user)
             flash("Account created!", category="success")
-            return redirect(url_for("views.home"))  # redirect to home
+            return redirect(url_for("views.home"))
 
     return render_template("signup.html", user=current_user)
 
@@ -99,10 +100,10 @@ def profile():
                 # Update user's profile information
                 user.first_name = first_name
                 user.last_name = last_name
-                db.session.commit()  # Commit the changes to the database
+                db.session.commit()
 
                 flash("Profile updated successfully!", category="success")
-                return redirect(url_for("auth.profile"))  # Redirect to profile page
+                return redirect(url_for("auth.profile"))
             else:
                 flash("Incorrect password, profile update failed.", category="error")
         else:

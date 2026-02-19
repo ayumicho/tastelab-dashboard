@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tastelab-dashboard
+    ports:
+      - "3139:3139"
+    environment:
+      - FLASK_ENV=production
+      - FLASK_APP=main.py
+      - SECRET_KEY=${SECRET_KEY:-tastelab-secret-key-change-in-production}
+      - DATABASE_URL=sqlite:///instance/users.db
+    volumes:
+      - db-data:/app/instance
+      - images-data:/app/static/images
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3139/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - dagster_dagster_network
+
+networks:
+  dagster_dagster_network:
+    external: true
+
+volumes:
+  db-data:
+    name: tastelab-db
+  images-data:
+    name: tastelab-images

@@ -1,12 +1,14 @@
-/* Profile Page Styling */
+/* ==================== Layout ==================== */
 .profile-container {
     max-width: 1000px;
     margin: 0 auto;
     padding: 2rem 1rem;
 }
 
+
+/* ==================== Profile Header ==================== */
 .profile-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
     border-radius: 16px;
     padding: 2rem;
     margin-bottom: 2rem;
@@ -22,10 +24,25 @@
     right: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
     pointer-events: none;
 }
 
+.profile-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.profile-subtitle {
+    text-align: center;
+    opacity: 0.9;
+    font-size: 1.1rem;
+}
+
+
+/* ==================== Avatar ==================== */
 .profile-avatar {
     width: 120px;
     height: 120px;
@@ -78,9 +95,11 @@
     opacity: 1;
 }
 
+
+/* ==================== File Upload ==================== */
 .file-upload-section {
-    background: rgba(102, 126, 234, 0.05);
-    border: 2px dashed rgba(102, 126, 234, 0.3);
+    background: rgba(255, 180, 120, 0.05);
+    border: 2px dashed rgba(255, 180, 120, 0.3);
     border-radius: 12px;
     padding: 1.5rem;
     text-align: center;
@@ -90,20 +109,20 @@
 }
 
 .file-upload-section:hover {
-    border-color: rgba(102, 126, 234, 0.5);
-    background: rgba(102, 126, 234, 0.08);
+    border-color: rgba(255, 180, 120, 0.5);
+    background: rgba(255, 180, 120, 0.08);
 }
 
 .file-upload-section.drag-over {
-    border-color: #667eea;
-    background: rgba(102, 126, 234, 0.1);
+    border-color: #ed8936;
+    background: rgba(255, 180, 120, 0.1);
 }
 
 .upload-icon {
     width: 48px;
     height: 48px;
     margin: 0 auto 1rem;
-    color: #667eea;
+    color: #ed8936;
 }
 
 .upload-text {
@@ -116,19 +135,8 @@
     color: #adb5bd;
 }
 
-.profile-title {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    text-align: center;
-}
 
-.profile-subtitle {
-    text-align: center;
-    opacity: 0.9;
-    font-size: 1.1rem;
-}
-
+/* ==================== Forms ==================== */
 .form-group {
     margin-bottom: 1.5rem;
 }
@@ -153,13 +161,15 @@
 
 .form-input:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #ed8936;
+    box-shadow: 0 0 0 3px rgba(255, 180, 120, 0.1);
     transform: translateY(-1px);
 }
 
+
+/* ==================== Buttons ==================== */
 .btn-modern-primary {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
     border: none;
     padding: 0.875rem 2rem;
     border-radius: 10px;
@@ -175,7 +185,7 @@
 
 .btn-modern-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 8px 25px rgba(255, 180, 120, 0.3);
     color: white;
 }
 
@@ -195,6 +205,8 @@
     transform: translateY(-1px);
 }
 
+
+/* ==================== Modal ==================== */
 .modal .modal-content {
     border-radius: 16px;
     border: none;
@@ -219,6 +231,8 @@
     border-radius: 0 0 16px 16px;
 }
 
+
+/* ==================== Security Notice ==================== */
 .security-notice {
     background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.1));
     border: 1px solid rgba(255, 193, 7, 0.3);
@@ -240,6 +254,8 @@
     font-size: 0.9rem;
 }
 
+
+/* ==================== Stats ==================== */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -248,8 +264,8 @@
 }
 
 .stat-card {
-    background: rgba(102, 126, 234, 0.05);
-    border: 1px solid rgba(102, 126, 234, 0.1);
+    background: rgba(255, 180, 120, 0.05);
+    border: 1px solid rgba(255, 180, 120, 0.1);
     border-radius: 12px;
     padding: 1.5rem;
     text-align: center;
@@ -258,7 +274,7 @@
 .stat-number {
     font-size: 1.8rem;
     font-weight: 700;
-    color: #667eea;
+    color: #ed8936;
     margin-bottom: 0.25rem;
 }
 
@@ -268,6 +284,8 @@
     font-weight: 500;
 }
 
+
+/* ==================== Responsive ==================== */
 @media (max-width: 768px) {
     .profile-container {
         padding: 1rem 0.5rem;

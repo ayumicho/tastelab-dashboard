@@ -9,20 +9,25 @@ The templates use a base template (`base.html`) that provides the core structure
 ## Template Hierarchy
 
 ```
-base.html (Base template)
+/templates/
+├── 404.html (Not found error)
+├── 500.html (Server error)
+├── detection-tracking.html (Computer Vision results)
+├── add-experiment.html (Create experiments)
+├── base.html (Base template)
+├── help.html (User assistance)
 ├── home.html (Dashboard home)
 ├── login.html (Authentication)
-├── signup.html (User registration)
-├── profile.html (User profile)
-├── add-experiment.html (Create experiments)
-├── single-experiment.html (Experiment details)
-├── cv.html (Computer Vision results)
-├── nlp.html (NLP model results)
-├── help.html (User assistance)
+├── logout.html (Logout confirmation)
+├── manual-annotation-label.html (Manual data annotation)
+├── manual-annotation.html (Manual data annotation)
 ├── privacy-policy.html (Privacy information)
+├── profile.html (User profile)
+├── signup.html (User registration)
+├── single-experiment.html (Individual experiment details)
 ├── terms-of-service.html (Terms of use)
-├── 404.html (Not found error)
-└── 500.html (Server error)
+└── transcription.html (NLP model results)
+
 ```
 
 ## Core Templates
@@ -292,4 +297,5 @@ When adding new templates:
 
 ---
 
-**Last Updated:** December 2025
+**Last Updated:** January 2025
+**Maintained by:** Ayumi Chotoe

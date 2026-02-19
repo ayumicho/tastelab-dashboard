@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}Label: {{ group.group_id }} {% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/manual-annotation.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="labeling-top-bar">
+        <a href="{{ url_for('views.manual_annotation') }}" class="btn-back">
+            <i class="fas fa-arrow-left"></i>
+            Back to Dashboard
+        </a>
+        <div class="labeling-progress-section">
+            <div class="labeling-progress-bar">
+                <div class="labeling-progress-fill" style="width: {{ progress }}%"></div>
+            </div>
+            <span class="labeling-progress-text">{{ done }} / {{ total }} groups</span>
+        </div>
+    </div>
+
+    <div class="header" style="margin-bottom: 1.5rem;">
+        <div>
+            <h1 class="header-title">{{ group.group_id }}</h1>
+            <p class="header-subtitle">Camera: {{ group.camera | default('Unknown') }} • {{ images|length }} sample images</p>
+        </div>
+    </div>
+
+    <div class="main-card">
+        <div class="chart-card">
+            <h3 class="card-title">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                Sample Images
+            </h3>
+            
+            <div class="labeling-loading-status" id="loadingStatus">Loading images...</div>
+
+            <div class="labeling-image-grid">
+                {% for img in images %}
+                <div class="labeling-image-card">
+                    <div class="labeling-skeleton"></div>
+                    <img src="{{ url_for('views.annotation_serve_image', image_path=img) }}" alt="Person crop" loading="lazy" onload="imageLoaded(this)" onerror="imageError(this)">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="labeling-action-panel">
+            <h2>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; vertical-align: middle; margin-right: 8px; color: #667eea;">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                Who is this person?
+            </h2>
+            
+            <div class="labeling-person-grid">
+                {% set staff_list = job.get('staff', []) %}
+                {% for pid in person_ids %}
+                <div class="labeling-person-wrapper">
+                    <button class="labeling-person-btn" data-person="{{ pid }}">
+                        {{ pid }}
+                        <span>Person {{ pid }}{% if pid|string in staff_list %} (Staff){% endif %}</span>
+                    </button>
+                    <button class="labeling-staff-btn {% if pid|string in staff_list %}active{% endif %}" data-person="{{ pid }}">
+                        {% if pid|string in staff_list %}★ Staff{% else %}☆ Mark Staff{% endif %}
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="labeling-action-buttons">
+                <button class="btn-action btn-danger" id="undoBtn">Undo Last</button>
+                <button class="btn-action btn-secondary" id="skipBtn">Skip</button>
+                <button class="btn-action btn-success" id="confirmBtn" disabled>Confirm Selection</button>
+            </div>
+
+            <p class="labeling-keyboard-hint">
+                Press <kbd>1</kbd>-<kbd>{{ person_ids|length }}</kbd> to select • <kbd>Enter</kbd> to confirm • <kbd>S</kbd> to skip
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="labeling-toast" id="toast">Saved!</div>
+
+<div class="labeling-saving-overlay" id="savingOverlay">
+    <div class="labeling-spinner"></div>
+    <p>Saving...</p>
+</div>
+
+<script>
+    const jobId = "{{ job_id }}";
+    const groupId = "{{ group.group_id }}";
+    const totalImages = {{ images|length }};
+    let loadedImages = 0;
+    let selectedPerson = null;
+
+    // Image loading tracking
+    function imageLoaded(img) {
+        img.classList.add('loaded');
+        const skeleton = img.previousElementSibling;
+        if (skeleton) skeleton.classList.add('hidden');
+        
+        loadedImages++;
+        updateLoadingStatus();
+    }
+
+    function imageError(img) {
+        const skeleton = img.previousElementSibling;
+        if (skeleton) {
+            skeleton.style.background = '#edf2f7';
+            skeleton.style.animation = 'none';
+        }
+        loadedImages++;
+        updateLoadingStatus();
+    }
+
+    function updateLoadingStatus() {
+        const statusEl = document.getElementById('loadingStatus');
+        if (loadedImages >= totalImages) {
+            statusEl.textContent = '';
+        } else {
+            statusEl.textContent = `Loading images... ${loadedImages}/${totalImages}`;
+        }
+    }
+
+    // Person selection
+    document.querySelectorAll('.labeling-person-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.labeling-person-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedPerson = btn.dataset.person;
+            document.getElementById('confirmBtn').disabled = false;
+        });
+    });
+
+    // Confirm
+    document.getElementById('confirmBtn').addEventListener('click', async () => {
+        if (!selectedPerson) return;
+        
+        document.getElementById('savingOverlay').classList.add('active');
+        
+        const res = await fetch('{{ url_for("views.annotation_assign") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                job_id: jobId,
+                group_id: groupId,
+                person_id: selectedPerson
+            })
+        });
+
+        if (res.ok) {
+            showToast('Saved!');
+            setTimeout(() => location.reload(), 300);
+        } else {
+            document.getElementById('savingOverlay').classList.remove('active');
+            alert('Error saving. Please try again.');
+        }
+    });
+
+    // Skip
+    document.getElementById('skipBtn').addEventListener('click', async () => {
+        document.getElementById('savingOverlay').classList.add('active');
+        document.querySelector('#savingOverlay p').textContent = 'Skipping...';
+        
+        const res = await fetch('{{ url_for("views.annotation_skip") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ job_id: jobId, group_id: groupId })
+        });
+        
+        if (res.ok) {
+            showToast('Skipped!');
+            setTimeout(() => location.reload(), 300);
+        } else {
+            document.getElementById('savingOverlay').classList.remove('active');
+            alert('Error skipping. Please try again.');
+        }
+    });
+
+    // Undo
+    document.getElementById('undoBtn').addEventListener('click', async () => {
+        document.getElementById('savingOverlay').classList.add('active');
+        document.querySelector('#savingOverlay p').textContent = 'Undoing...';
+        
+        const res = await fetch('{{ url_for("views.annotation_undo") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ job_id: jobId })
+        });
+        
+        if (res.ok) {
+            showToast('Undone!');
+            setTimeout(() => location.reload(), 300);
+        } else {
+            document.getElementById('savingOverlay').classList.remove('active');
+            alert('Nothing to undo.');
+        }
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        // Ignore if typing in an input field
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        
+        const maxPerson = {{ person_ids|length }};
+        const num = parseInt(e.key);
+        if (num >= 1 && num <= maxPerson) {
+            const btn = document.querySelector(`.labeling-person-btn[data-person="${num}"]`);
+            if (btn) btn.click();
+        } else if (e.key === 'Enter' && selectedPerson) {
+            document.getElementById('confirmBtn').click();
+        } else if (e.key.toLowerCase() === 's') {
+            document.getElementById('skipBtn').click();
+        }
+    });
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    // Staff toggle
+    document.querySelectorAll('.labeling-staff-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const personId = btn.dataset.person;
+            
+            const res = await fetch('{{ url_for("views.annotation_toggle_staff") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ job_id: jobId, person_id: personId })
+            });
+            
+            if (res.ok) {
+                const data = await res.json();
+                const personBtn = btn.previousElementSibling;
+                const personLabel = personBtn.querySelector('span');
+                
+                if (data.is_staff) {
+                    btn.classList.add('active');
+                    btn.textContent = '★ Staff';
+                    personLabel.textContent = `Person ${personId} (Staff)`;
+                    showToast(`Person ${personId} marked as staff`);
+                } else {
+                    btn.classList.remove('active');
+                    btn.textContent = '☆ Mark Staff';
+                    personLabel.textContent = `Person ${personId}`;
+                    showToast(`Person ${personId} unmarked as staff`);
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

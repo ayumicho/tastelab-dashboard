@@ -1,403 +1,87 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Home{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/base.css')}}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
 {% endblock %}
 
 {% block content %}
-
 <div class="container-fluid py-4">
-    <!-- Enhanced Dashboard Header -->
-    <div class="dashboard-header-section">
-        <div class="header-content-wrapper">
-            <div class="welcome-section">
-                <h1 class="dashboard-title">Welcome back, {{ user.first_name }}!</h1>
+    <div class="header-section">
+        <div class="header-content">
+            <div class="dashboard-section">
+                <h1 class="dashboard-title">Welcome {{ user.first_name }}!</h1>
                 <p class="dashboard-subtitle">Here's what's happening with your sensory experiments today</p>
             </div>
         </div>
     </div>
 
-    <!-- Insight Cards Row -->
-    <div class="insight-cards-grid">
-        <div class="insight-card purple">
-            <div class="insight-icon">
-                <i class="fas fa-flask"></i>
-            </div>
-            <div class="insight-content">
-                <div class="insight-label">Total Experiments</div>
-                <div class="insight-value">{{ stats.total_experiments }}</div>
-                <div class="insight-change">
-                    <i class="fas fa-chart-line"></i>
-                    All recorded experiments
-                </div>
+    <div class="cards-grid">
+        <div class="small-card mint">
+            <div class="icon"><i class="fas fa-flask"></i></div>
+            <div class="content">
+                <div class="label">This Month</div>
+                <div class="value">{{ stats.this_month }}</div>
+                <div class="change"><i class="fas fa-chart-line"></i> Experiments</div>
             </div>
         </div>
-        
-        <div class="insight-card green">
-            <div class="insight-icon">
-                <i class="fas fa-brain"></i>
-            </div>
-            <div class="insight-content">
-                <div class="insight-label">With Analysis</div>
-                <div class="insight-value">{{ stats.experiments_with_analysis }}</div>
-                <div class="insight-change">
-                    <i class="fas fa-check-circle"></i>
-                    Emotion analyses complete
-                </div>
+
+        <div class="small-card blue">
+            <div class="icon"><i class="fas fa-users"></i></div>
+            <div class="content">
+                <div class="label">Total Participants</div>
+                <div class="value">{{ stats.total_participants }}</div>
+                <div class="change"><i class="fas fa-user-plus"></i> Across all sessions</div>
             </div>
         </div>
-        
-        <div class="insight-card blue">
-            <div class="insight-icon">
-                <i class="fas fa-list-ol"></i>
-            </div>
-            <div class="insight-content">
-                <div class="insight-label">Total Segments</div>
-                <div class="insight-value">{{ stats.total_segments or 0 }}</div>
-                <div class="insight-change">
-                    <i class="fas fa-database"></i>
-                    Analyzed data segments
-                </div>
+
+        <div class="small-card purple">
+            <div class="icon"><i class="fas fa-clock"></i></div>
+            <div class="content">
+                <div class="label">Avg Duration</div>
+                <div class="value">{{ stats.avg_duration }}m</div>
+                <div class="change"><i class="fas fa-hourglass-half"></i> Per experiment</div>
             </div>
         </div>
-        
-        <div class="insight-card orange">
-            <div class="insight-icon">
-                <i class="fas fa-check-double"></i>
-            </div>
-            <div class="insight-content">
-                <div class="insight-label">Completed</div>
-                <div class="insight-value">{{ stats.completed_experiments }}</div>
-                <div class="insight-change">
-                    <i class="fas fa-flag-checkered"></i>
-                    Finished experiments
-                </div>
+
+        <div class="small-card orange">
+            <div class="icon"><i class="fas fa-clipboard-check"></i></div>
+            <div class="content">
+                <div class="label">Total Experiments</div>
+                <div class="value">{{ stats.total_experiments }}</div>
+                <div class="change"><i class="fas fa-check-circle"></i> Completed</div>
             </div>
         </div>
     </div>
 
-    <!-- Experiment Selector Card -->
-    <div class="selector-card">
-        <div class="selector-header">
-            <div class="selector-title-section">
-                <i class="fas fa-filter"></i>
-                <h3>Select Experiment to View</h3>
-            </div>
-            <div class="selector-actions">
-                <button class="btn-icon" id="compareBtn" title="Compare Experiments">
-                    <i class="fas fa-balance-scale"></i>
-                </button>
-                <button class="btn-icon" id="exportBtn" title="Export Data">
-                    <i class="fas fa-download"></i>
-                </button>
-            </div>
-        </div>
-        <div class="selector-content">
-            <select class="experiment-select-modern" id="experimentSelect">
-                {% if experiments %}
-                    {% for exp in experiments %}
-                        <option value="{{ exp.id }}" {% if selected_experiment and selected_experiment.id == exp.id %}selected{% endif %}>
-                            {{ exp.title }} ({{ exp.date.strftime('%b %d, %Y') }})
-                            {% if exp.analysis %} ✓ Analyzed{% endif %}
-                        </option>
-                    {% endfor %}
-                {% else %}
-                    <option value="">No experiments available</option>
-                {% endif %}
-            </select>
-        </div>
-    </div>
-
-    {% if selected_experiment %}
-    <!-- Selected Experiment Overview -->
-    <div class="experiment-overview-card">
-        <div class="overview-header">
-            <div class="overview-title-section">
-                <h2 class="overview-title">{{ selected_experiment.title }}</h2>
-                {% if analysis %}
-                    <span class="analysis-status-badge complete">
-                        <i class="fas fa-check-circle"></i>
-                        Analysis Complete
-                    </span>
-                {% else %}
-                    <span class="analysis-status-badge pending">
-                        <i class="fas fa-clock"></i>
-                        No Analysis
-                    </span>
-                {% endif %}
-            </div>
-            {% if selected_experiment.description %}
-            <p class="overview-description">{{ selected_experiment.description }}</p>
-            {% endif %}
-        </div>
-
-        <!-- Experiment Metadata Grid -->
-        <div class="metadata-grid">
-            <div class="metadata-card">
-                <div class="metadata-icon participants">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="metadata-content">
-                    <div class="metadata-value">{{ selected_experiment.participant_count or 0 }}</div>
-                    <div class="metadata-label">Participants</div>
-                </div>
-            </div>
-            
-            <div class="metadata-card">
-                <div class="metadata-icon calendar">
-                    <i class="fas fa-calendar-alt"></i>
-                </div>
-                <div class="metadata-content">
-                    <div class="metadata-value">{{ selected_experiment.date.strftime('%d') }}</div>
-                    <div class="metadata-label">{{ selected_experiment.date.strftime('%B %Y') }}</div>
-                </div>
-            </div>
-            
-            <div class="metadata-card">
-                <div class="metadata-icon clock">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="metadata-content">
-                    <div class="metadata-value">{{ selected_experiment.format_duration() }}</div>
-                    <div class="metadata-label">Duration</div>
-                </div>
-            </div>
-            
-            <div class="metadata-card">
-                <div class="metadata-icon status">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="metadata-content">
-                    <div class="metadata-value">{{ selected_experiment.status }}</div>
-                    <div class="metadata-label">Status</div>
-                </div>
-            </div>
-        </div>
-
-        {% if selected_experiment.tags %}
-        <div class="tags-display">
-            <div class="tags-label">
-                <i class="fas fa-tags"></i>
-                <span>Tags:</span>
-            </div>
-            <div class="tags-list-display">
-                {% for tag in selected_experiment.tags.split(',') %}
-                    <span class="tag-item">{{ tag.strip() }}</span>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-    </div>
-
-    <!-- Emotion Analysis Section -->
-    {% if analysis %}
-    <div class="analysis-results-card">
-        <div class="analysis-header">
-            <div class="analysis-title-section">
-                <i class="fas fa-brain"></i>
-                <h2>Emotion Analysis Results</h2>
-            </div>
-            <a href="{{ url_for('views.transcription', id=selected_experiment.id) }}" class="btn-view-full">
-                View Full Analysis
-                <i class="fas fa-arrow-right"></i>
-            </a>
-        </div>
-
-        <!-- Analysis Metrics -->
-        <div class="analysis-metrics-grid">
-            <div class="analysis-metric primary">
-                <div class="metric-icon">
-                    <i class="fas fa-smile"></i>
-                </div>
-                <div class="metric-content">
-                    <div class="metric-label">Dominant Emotion</div>
-                    <div class="metric-value">{{ analysis.dominant_emotion|title }}</div>
-                </div>
-            </div>
-            
-            <div class="analysis-metric">
-                <div class="metric-icon">
-                    <i class="fas fa-list"></i>
-                </div>
-                <div class="metric-content">
-                    <div class="metric-label">Total Segments</div>
-                    <div class="metric-value">{{ analysis.total_segments or 0 }}</div>
-                </div>
-            </div>
-            
-            <div class="analysis-metric">
-                <div class="metric-icon">
-                    <i class="fas fa-font"></i>
-                </div>
-                <div class="metric-content">
-                    <div class="metric-label">Words Analyzed</div>
-                    <div class="metric-value">{{ analysis.word_count or 0 }}</div>
-                </div>
-            </div>
-            
-            <div class="analysis-metric">
-                <div class="metric-icon">
-                    <i class="fas fa-book-reader"></i>
-                </div>
-                <div class="metric-content">
-                    <div class="metric-label">Reading Time</div>
-                    <div class="metric-value">{{ "%.1f"|format(analysis.reading_time_minutes or 0) }}m</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Emotion Distribution -->
-        {% if analysis.emotion_summary and analysis.emotion_summary.emotion_percentages %}
-        <div class="emotion-distribution-section">
-            <h3 class="section-title">
-                <i class="fas fa-chart-pie"></i>
-                Emotion Distribution
-            </h3>
-            <div class="distribution-grid">
-                <div class="distribution-bars-section">
-                    {% for emotion, percentage in analysis.emotion_summary.emotion_percentages.items() %}
-                    <div class="emotion-bar-item">
-                        <div class="emotion-bar-header">
-                            <span class="emotion-name">{{ emotion|title }}</span>
-                            <span class="emotion-percent">{{ "%.1f"|format(percentage) }}%</span>
-                        </div>
-                        <div class="emotion-progress-track">
-                            <div class="emotion-progress-bar" style="width: {{ percentage }}%;" data-emotion="{{ emotion|lower }}"></div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                <div class="distribution-chart-section">
-                    <canvas id="emotionPieChart"></canvas>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- Additional Analysis Metrics -->
-        <div class="additional-metrics-grid">
-            <div class="additional-metric purple">
-                <div class="additional-metric-icon">
-                    <i class="fas fa-question-circle"></i>
-                </div>
-                <div class="additional-metric-content">
-                    <div class="additional-metric-value">{{ analysis.questions.count() }}</div>
-                    <div class="additional-metric-label">Questions Detected</div>
-                </div>
-            </div>
-            
-            <div class="additional-metric pink">
-                <div class="additional-metric-icon">
-                    <i class="fas fa-tasks"></i>
-                </div>
-                <div class="additional-metric-content">
-                    <div class="additional-metric-value">{{ analysis.actions.count() }}</div>
-                    <div class="additional-metric-label">Action Items</div>
-                </div>
-            </div>
-            
-            <div class="additional-metric blue">
-                <div class="additional-metric-icon">
-                    <i class="fas fa-key"></i>
-                </div>
-                <div class="additional-metric-content">
-                    <div class="additional-metric-value">{{ analysis.keywords.count() }}</div>
-                    <div class="additional-metric-label">Keywords</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% else %}
-    <!-- No Analysis Available -->
-    <div class="no-analysis-card">
-        <div class="no-analysis-content">
-            <div class="no-analysis-icon">
-                <i class="fas fa-database"></i>
-            </div>
-            <h3>No Emotion Analysis Data</h3>
-            <p>Import emotion analysis data from MinIO to see detailed insights for this experiment.</p>
-            <form method="POST" action="{{ url_for('views.manual_sync') }}" style="display: inline;">
-                <button class="code-snippet">
-                    <i class="fas fa-terminal"></i>
-                    <code>Sync MinIO Data</code>
-                </button>
-            </form>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Charts Row -->
-    <div class="charts-row">
-        <div class="chart-card">
-            <div class="chart-header">
-                <i class="fas fa-chart-line"></i>
-                <h3>Participant Trends</h3>
-            </div>
-            <div class="chart-container-wrapper">
-                <canvas id="participantChart"></canvas>
-            </div>
-        </div>
-
-        <div class="chart-card">
-            <div class="chart-header">
-                <i class="fas fa-chart-pie"></i>
-                <h3>Experiment Categories</h3>
-            </div>
-            <div class="chart-container-wrapper">
-                <canvas id="tagChart"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Actions Panel -->
     <div class="quick-actions-card">
         <div class="quick-actions-header">
             <i class="fas fa-bolt"></i>
             <h2>Quick Actions</h2>
         </div>
         <div class="quick-actions-grid">
-            <a href="{{ url_for('views.transcription') }}" class="action-button">
-                <div class="action-icon purple">
-                    <i class="fas fa-brain"></i>
-                </div>
+            <a href="{{ url_for('views.speech_to_text') }}" class="action-button">
+                <div class="action-icon beige"><i class="fa-solid fa-comment-dots"></i></div>
                 <div class="action-content">
-                    <div class="action-title">Emotion Analysis</div>
-                    <div class="action-description">View detailed analyses</div>
+                    <div class="action-title">Speech to Text Analysis</div>
+                    <div class="action-description">View transcripts</div>
                 </div>
                 <i class="fas fa-arrow-right action-arrow"></i>
             </a>
-            
-            <a href="{{ url_for('views.experiments') }}" class="action-button">
-                <div class="action-icon green">
-                    <i class="fas fa-flask"></i>
-                </div>
+            <a href="{{ url_for('views.detection_tracking') }}" class="action-button">
+                <div class="action-icon yellow"><i class="fas fa-walking"></i></div>
                 <div class="action-content">
-                    <div class="action-title">All Experiments</div>
-                    <div class="action-description">Browse experiments</div>
+                    <div class="action-title">Detection & Tracking</div>
+                    <div class="action-description">View heatmaps</div>
                 </div>
                 <i class="fas fa-arrow-right action-arrow"></i>
             </a>
-            
-            <a href="{{ url_for('views.analytics') }}" class="action-button">
-                <div class="action-icon blue">
-                    <i class="fas fa-chart-bar"></i>
-                </div>
-                <div class="action-content">
-                    <div class="action-title">Analytics</div>
-                    <div class="action-description">View insights</div>
-                </div>
-                <i class="fas fa-arrow-right action-arrow"></i>
-            </a>
-            
             <a href="{{ url_for('views.add_experiment') }}" class="action-button">
-                <div class="action-icon orange">
-                    <i class="fas fa-plus-circle"></i>
-                </div>
+                <div class="action-icon red"><i class="fas fa-plus-circle"></i></div>
                 <div class="action-content">
                     <div class="action-title">New Experiment</div>
                     <div class="action-description">Add new data</div>
@@ -407,38 +91,326 @@
         </div>
     </div>
 
+    <div class="overview-card">
+        <div class="overview-bar">
+            <div class="overview-title-bar">
+                <i class="fas fa-filter"></i>
+                <h3>Select Experiment to View</h3>
+            </div>
+            <div class="overview-actions">
+                <form id="syncForm" method="POST" action="{{ url_for('views.manual_sync') }}" style="display: inline;">
+                    <button type="submit" class="btn-icon" title="Sync Data">
+                        <i class="fas fa-sync"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="overview-content">
+            <div class="experiment-dropdown" id="experimentSelect">
+                <div class="dropdown-selected">
+                    {% if selected_experiment %}
+                        {{ selected_experiment.title }} ({{ selected_experiment.date.strftime('%b %d, %Y') }})
+                    {% else %}
+                        Select Experiment
+                    {% endif %}
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="dropdown-options">
+                    {% if experiments %}
+                        {% for exp in experiments %}
+                        <div class="dropdown-option {% if selected_experiment and selected_experiment.id == exp.id %}active{% endif %}" 
+                            data-value="{{ exp.id }}">
+                            {{ exp.title }} ({{ exp.date.strftime('%b %d, %Y') }})
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="dropdown-option disabled">No experiments available</div>
+                    {% endif %}
+                </div>    
+            </div>
+        </div>
+    </div>
+
+    {% if selected_experiment %}
+    <div class="overview-card">
+        <div class="overview-header">
+            <div class="overview-title-section">
+                <h2 class="overview-title">{{ selected_experiment.title }}</h2>
+                    <div class="status-badges">
+                        <a href="{{ url_for('views.view_experiment', experiment_id=selected_experiment.id) }}" class="btn-view-full">
+                            View Experiment <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+            </div>
+            {% if selected_experiment.summary %}
+            <p class="overview-description">{{ selected_experiment.summary }}</p>
+            {% endif %}
+        </div>
+
+        <div class="experiment-grid">
+            <div class="experiment-card">
+                <div class="experiment-icon participants"><i class="fas fa-users"></i></div>
+                <div class="experiment-content">
+                    <div class="experiment-value">{{ selected_experiment.participant_count or 0 }}</div>
+                    <div class="experiment-label">Participants</div>
+                </div>
+            </div>
+            <div class="experiment-card">
+                <div class="experiment-icon calendar"><i class="fas fa-calendar-alt"></i></div>
+                <div class="experiment-content">
+                    <div class="experiment-value">{{ selected_experiment.date.strftime('%d') }}</div>
+                    <div class="experiment-label">{{ selected_experiment.date.strftime('%B %Y') }}</div>
+                </div>
+            </div>
+            <div class="experiment-card">
+                <div class="experiment-icon clock"><i class="fas fa-clock"></i></div>
+                <div class="experiment-content">
+                    <div class="experiment-value">{{ selected_experiment.format_duration() }}</div>
+                    <div class="experiment-label">Duration</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="margin-top: 20px;">
+        <div class="col-lg-6 mb-4">
+            {% if nlp_analysis %}
+            <div class="analysis-card h-100">
+                <div class="analysis-header">
+                    <div class="analysis-title-section">
+                        <i class="fa-solid fa-comment-dots"></i>
+                        <h2>Speech to Text</h2>
+                    </div>
+                    <a href="{{ url_for('views.speech_to_text', id=selected_experiment.id) }}" class="btn-view-full">
+                        View Details <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="analysis-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="analysis-metric primary">
+                        <div class="metric-icon"><i class="fas fa-smile"></i></div>
+                        <div class="metric-content">
+                            <div class="metric-label">Dominant</div>
+                            <div class="metric-value">{{ nlp_analysis.dominant_emotion|title if nlp_analysis.dominant_emotion else 'N/A' }}</div>
+                        </div>
+                    </div>
+                    <div class="analysis-metric">
+                        <div class="metric-icon"><i class="fas fa-comments"></i></div>
+                        <div class="metric-content">
+                            <div class="metric-label">Segments</div>
+                            <div class="metric-value">{{ nlp_analysis.total_segments or 0 }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if nlp_analysis.transcript_summary and nlp_analysis.transcript_summary.summary %}
+                <div class="summary-section mt-4 pt-3" style="border-top: 1px solid #edf2f7;">
+                    <h4 style="font-size: 0.85rem; color: #718096; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
+                        <i class="fas fa-file-alt mr-2"></i> AI summary
+                    </h4>
+                    <p style="font-size: 0.95rem; line-height: 1.6; color: #2d3748; background: #f7fafc; padding: 12px; border-radius: 8px; border-left: 3px solid #667eea;">
+                        {{ nlp_analysis.transcript_summary.summary }}
+                    </p>
+                </div>
+                {% else %}
+                <div class="summary-section mt-4 pt-3" style="border-top: 1px solid #edf2f7;">
+                    <h4 style="font-size: 0.85rem; color: #718096; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
+                        <i class="fas fa-file-alt mr-2"></i> AI Summary
+                    </h4>
+                    <p class="highlight-box" style="background: #f8fafc; border-left-color: #718096; color: #4a5568;">
+                        Summary not available for this experiment.
+                    </p> 
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="no-analysis-card h-100">
+                <div class="no-analysis-content">
+                    <i class="fa-solid fa-microphone-slash" style="font-size: 2rem; color: #ed8936;"></i>
+                    <h3 class="mt-2">No Transcription</h3>
+                    <p>No audio analysis data found.</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            {% if tracking_analysis %}
+            <div class="analysis-card h-100">
+                <div class="analysis-header">
+                    <div class="analysis-title-section">
+                        <i class="fas fa-walking"></i>
+                        <h2>Detection & Tracking</h2>
+                    </div>
+                    <a href="{{ url_for('views.detection_tracking', exp_id=selected_experiment.id) }}" class="btn-view-full">
+                        View Heatmap <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="analysis-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="additional-metric blue">
+                        <div class="metric-icon" style="color: #f5f9fd;"><i class="fas fa-users"></i></div>
+                        <div class="metric-content">
+                            <div class="metric-label">Detected</div>
+                            <div class="additional-metric-value">
+                                {% if tracking_analysis.detections and tracking_analysis.detections %}
+                                    {{ tracking_analysis.detections.people|length }} People
+                                {% else %}
+                                    {{ selected_experiment.participant_count or 0 }} People
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="additional-metric pink">
+                        <div class="metric-icon"><i class="fas fa-stopwatch"></i></div>
+                        <div class="metric-content">
+                            <div class="metric-label">Duration</div>
+                            <div class="additional-metric-value">{{ selected_experiment.format_duration() }}</div>
+                        </div>    
+                    </div>
+                </div>
+                <div class="additional-metrics-grid mt-4">
+                    <div class="additional-metric purple">
+                        <div class="additional-metric-icon"><i class="fas fa-camera"></i></div>
+                        <div class="additional-metric-content">
+                            <div class="additional-metric-value">4</div>
+                            <div class="additional-metric-label">Active Cameras</div>
+                        </div>
+                    </div>
+                     <div class="additional-metric yellow">
+                        <div class="additional-metric-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <div class="additional-metric-content">
+                            <div class="additional-metric-value">High</div>
+                            <div class="additional-metric-label">Activity Level</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="no-analysis-card h-100">
+                <div class="no-analysis-content">
+                    <i class="fa-solid fa-eye-slash" style="font-size: 2rem; color: #ed8936;"></i>
+                    <h3 class="mt-2">No Tracking Data</h3>
+                    <p>No people detected or video processed.</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="charts-row">
+        <div class="chart-card">
+            <div class="chart-header">
+                <i class="fas fa-chart-line"></i>
+                <h2>Participant Trends</h2>
+            </div>
+            {% if participant_trend and participant_trend.labels and participant_trend.labels|length > 0 %}
+            <div class="chart-container-wrapper">
+                <canvas id="participantChart"></canvas>
+            </div>
+            {% else %}
+            <div class="no-analysis-content" style="padding: 60px 20px;">
+                <i class="fas fa-chart-line" style="font-size: 2rem; color: #ed8936;"></i>
+                <h3 class="mt-2">No Trend Data</h3>
+                <p>Add experiments to see participant trends over time.</p>
+            </div>
+            {% endif %}
+        </div>
+        <div class="chart-card">
+            <div class="chart-header">
+                <i class="fas fa-chart-pie"></i>
+                <h2>Experiment Categories</h2>
+            </div>
+            {% if tag_counts and tag_counts|length > 0 %}
+            <div class="chart-container-wrapper">
+                <canvas id="tagChart"></canvas>
+            </div>
+            {% else %}
+            <div class="no-analysis-content" style="padding: 60px 20px;">
+                <i class="fas fa-tags" style="font-size: 2rem; color: #ed8936;"></i>
+                <h3 class="mt-2">No Categories</h3>
+                <p>Tag your experiments to see category distribution.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
     <!-- Recent Activity & Top Experiments -->
     <div class="activity-section-grid">
         <div class="activity-card">
             <div class="activity-header">
                 <i class="fas fa-history"></i>
-                <h3>Recent Activity</h3>
+                <h2>Recent Activity</h2>
             </div>
+            {% if recent_activity and recent_activity|length > 0 %}
             <div class="activity-list">
                 {% for exp in recent_activity %}
                 <div class="activity-list-item">
-                    <div class="activity-item-icon {% if exp.analysis %}analyzed{% endif %}">
-                        <i class="fas {% if exp.analysis %}fa-check-circle{% else %}fa-flask{% endif %}"></i>
+                    
+                    {# Determine the status class and icon #}
+                    {% set status_class = "status-none" %}
+                    {% if exp.nlp_analysis and exp.tracking_analysis %}
+                        {% set status_class = "status-both" %}
+                    {% elif exp.nlp_analysis %}
+                        {% set status_class = "status-nlp" %}
+                    {% elif exp.tracking_analysis %}
+                        {% set status_class = "status-tracking" %}
+                    {% endif %}
+
+                    <div class="activity-item-icon {{ status_class }}">
+                        {% if status_class == "status-both" %}
+                            <i class="fa-solid fa-check-double" title="Complete Analysis"></i>
+                        
+                        {% elif status_class == "status-nlp" %}
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14,2 14,8 20,8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10,9 9,9 8,9"></polyline>
+                            </svg>
+
+                        {% elif status_class == "status-tracking" %}
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="14.31" y1="8" x2="20.05" y2="17.94"/>
+                                <line x1="9.69" y1="8" x2="21.17" y2="8"/>
+                                <line x1="7.38" y1="12" x2="13.12" y2="2.06"/>
+                                <line x1="9.69" y1="16" x2="3.95" y2="6.06"/>
+                                <line x1="14.31" y1="16" x2="2.83" y2="16"/>
+                                <line x1="16.62" y1="12" x2="10.88" y2="21.94"/>
+                            </svg>
+
+                        {% else %}
+                            <i class="fa-regular fa-circle" title="No Analysis"></i>
+                        {% endif %}
                     </div>
+
                     <div class="activity-item-content">
                         <div class="activity-item-title">{{ exp.title }}</div>
                         <div class="activity-item-meta">
+                            <span class="activity-item-date">{{ exp.date.strftime('%b %d, %Y') }}</span>
                             <span><i class="fas fa-users"></i> {{ exp.participant_count or 0 }}</span>
                             <span><i class="fas fa-clock"></i> {{ exp.format_duration() }}</span>
-                            {% if exp.analysis %}<span class="analyzed-badge"><i class="fas fa-brain"></i> Analyzed</span>{% endif %}
                         </div>
-                        <div class="activity-item-date">{{ exp.date.strftime('%B %d, %Y') }}</div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
+            {% else %}
+            <div class="no-analysis-content" style="padding: 60px 20px;">
+                <i class="fas fa-history" style="font-size: 2rem; color: #ed8936;"></i>
+                <h3 class="mt-2">No Recent Activity</h3>
+                <p>Start by adding your first experiment.</p>
+            </div>
+            {% endif %}
         </div>
 
         <div class="top-experiments-card">
             <div class="top-experiments-header">
                 <i class="fas fa-trophy"></i>
-                <h3>Top Experiments</h3>
+                <h2>Top Experiments</h2>
             </div>
+            {% if top_experiments and top_experiments|length > 0 %}
             <div class="top-experiments-list-modern">
                 {% for exp in top_experiments %}
                 <div class="top-experiment-modern">
@@ -454,192 +426,183 @@
                 </div>
                 {% endfor %}
             </div>
-        </div>
-    </div>
-
-    {% else %}
-    <!-- No Experiments Message -->
-    <div class="empty-experiments-card">
-        <div class="empty-content">
-            <div class="empty-icon">
-                <i class="fas fa-flask"></i>
+            {% else %}
+            <div class="no-analysis-content" style="padding: 60px 20px;">
+                <i class="fas fa-trophy" style="font-size: 2rem; color: #ed8936;"></i>
+                <h3 class="mt-2">No Experiments Yet</h3>
+                <p>Top experiments will appear here based on participant count.</p>
             </div>
-            <h3>No Experiments Available</h3>
-            <p>Create your first experiment to get started with sensory analysis</p>
-            <a href="{{ url_for('views.add_experiment') }}" class="btn-create-first">
-                <i class="fas fa-plus"></i>
-                Create First Experiment
-            </a>
+            {% endif %}
         </div>
     </div>
-    {% endif %}
+</div>
+
+<div class="loading-overlay" id="syncOverlay">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">Syncing with MinIO...</p>
 </div>
 
 <script>
-    // Experiment selector
-    const experimentSelect = document.getElementById('experimentSelect');
-    if (experimentSelect) {
-        experimentSelect.addEventListener('change', function() {
-            const expId = this.value;
-            if (expId) {
-                window.location.href = `/?exp_id=${expId}`;
+    document.addEventListener('DOMContentLoaded', () => {
+        // Keep same experiment on page
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlExpId = urlParams.get('exp_id');
+        const storedExpId = localStorage.getItem('active_exp_id');
+
+        if (urlExpId) {
+            if (urlExpId !== storedExpId) {
+                localStorage.setItem('active_exp_id', urlExpId);
             }
-        });
-    }
+        } else if (storedExpId) {
+            window.location.search = `?exp_id=${storedExpId}`;
+            return;
+        }
 
-    // Export and Compare buttons
-    document.getElementById('exportBtn')?.addEventListener('click', () => alert('Export functionality coming soon!'));
-    document.getElementById('compareBtn')?.addEventListener('click', () => alert('Compare functionality coming soon!'));
+        // Dropdown Logic
+        const experimentSelect = document.getElementById('experimentSelect'); 
+        
+        if (experimentSelect) {
+            const selectedBox = experimentSelect.querySelector('.dropdown-selected');
+            const options = experimentSelect.querySelectorAll('.dropdown-option');
 
-    // Template data
-    const templateData = {
-        participantTrend: {
-            labels: {{ participant_trend.labels | tojson if participant_trend and participant_trend.labels else '[]' | safe }},
-            data: {{ participant_trend.data | tojson if participant_trend and participant_trend.data else '[]' | safe }}
-        },
-        tagCounts: {{ tag_counts | tojson if tag_counts else '{}' | safe }},
-        {% if analysis and analysis.emotion_summary and analysis.emotion_summary.emotion_percentages %}
-        emotionData: {{ analysis.emotion_summary.emotion_percentages | tojson | safe }}
-        {% else %}
-        emotionData: null
-        {% endif %}
-    };
+            selectedBox.addEventListener('click', function(e) {
+                experimentSelect.classList.toggle('active');
+                e.stopPropagation();
+            });
 
-    // Participant Chart
-    const participantCtx = document.getElementById('participantChart');
-    if (participantCtx && templateData.participantTrend.labels.length > 0) {
-        new Chart(participantCtx, {
-            type: 'line',
-            data: {
-                labels: templateData.participantTrend.labels,
-                datasets: [{
-                    label: 'Participants',
-                    data: templateData.participantTrend.data,
-                    borderColor: '#667eea',
-                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                    tension: 0.4,
-                    fill: true,
-                    borderWidth: 3,
-                    pointBackgroundColor: '#667eea',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 5,
-                    pointHoverRadius: 7
-                }]
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    const expId = this.getAttribute('data-value');
+                    if (expId) {
+                        localStorage.setItem('active_exp_id', expId);
+                        window.location.href = `/?exp_id=${expId}`;
+                    }
+                });
+            });
+
+            document.addEventListener('click', function() {
+                experimentSelect.classList.remove('active');
+            });
+        }
+
+        // Chart Logic (Existing code wrapped here)
+        const templateData = {
+            participantTrend: {
+                labels: {{ participant_trend.labels | tojson if participant_trend and participant_trend.labels else '[]' | safe }},
+                data: {{ participant_trend.data | tojson if participant_trend and participant_trend.data else '[]' | safe }}
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { 
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        padding: 12,
-                        cornerRadius: 8
-                    }
-                },
-                scales: { 
-                    y: { 
-                        beginAtZero: true, 
-                        ticks: { precision: 0 },
-                        grid: { color: 'rgba(0, 0, 0, 0.05)' }
-                    },
-                    x: {
-                        grid: { display: false }
-                    }
-                }
-            }
-        });
-    }
-
-    // Tag Chart
-    const tagCtx = document.getElementById('tagChart');
-    if (tagCtx && Object.keys(templateData.tagCounts).length > 0) {
-        new Chart(tagCtx, {
-            type: 'doughnut',
-            data: {
-                labels: Object.keys(templateData.tagCounts),
-                datasets: [{
-                    data: Object.values(templateData.tagCounts),
-                    backgroundColor: [
-                        '#667eea', '#764ba2', '#f093fb', 
-                        '#4facfe', '#43e97b', '#fa709a',
-                        '#ed8936', '#48bb78'
-                    ],
-                    borderWidth: 3,
-                    borderColor: '#fff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { 
-                    legend: { 
-                        position: 'bottom',
-                        labels: {
-                            padding: 15,
-                            font: { size: 13, weight: '600' },
-                            usePointStyle: true
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        padding: 12,
-                        cornerRadius: 8
-                    }
-                }
-            }
-        });
-    }
-
-    // Emotion Pie Chart
-    const emotionCtx = document.getElementById('emotionPieChart');
-    if (emotionCtx && templateData.emotionData) {
-        const emotionColors = {
-            'happy': '#48bb78', 'sad': '#4299e1', 'angry': '#f56565',
-            'neutral': '#a0aec0', 'fear': '#ed8936', 'surprise': '#f6e05e', 'disgust': '#9f7aea'
+            tagCounts: {{ tag_counts | tojson if tag_counts else '{}' | safe }},
+            {% if nlp_analysis and nlp_analysis.emotion_data and nlp_analysis.emotion_data.emotion_percentages %}
+            emotionData: {{ nlp_analysis.emotion_data.emotion_percentages | tojson | safe }}
+            {% else %}
+            emotionData: null
+            {% endif %}
         };
-        
-        const labels = Object.keys(templateData.emotionData);
-        const values = Object.values(templateData.emotionData);
-        const colors = labels.map(l => emotionColors[l.toLowerCase()] || '#a0aec0');
-        
-        new Chart(emotionCtx, {
-            type: 'doughnut',
-            data: {
-                labels: labels.map(l => l.charAt(0).toUpperCase() + l.slice(1)),
-                datasets: [{
-                    data: values,
-                    backgroundColor: colors,
-                    borderWidth: 3,
-                    borderColor: '#fff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { 
-                    legend: { 
-                        position: 'bottom',
-                        labels: {
-                            padding: 15,
-                            font: { size: 13, weight: '600' },
-                            usePointStyle: true
+
+        // Participant Chart
+        const participantCtx = document.getElementById('participantChart');
+        if (participantCtx && templateData.participantTrend.labels && templateData.participantTrend.labels.length > 0) {
+            new Chart(participantCtx, {
+                type: 'line',
+                data: {
+                    labels: templateData.participantTrend.labels,
+                    datasets: [{
+                        label: 'Participants',
+                        data: templateData.participantTrend.data,
+                        borderColor: '#b4532a',
+                        backgroundColor: 'rgba(180, 83, 42, 0.12)',
+                        tension: 0.4,
+                        fill: true,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#e98a3f',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            cornerRadius: 8
                         }
                     },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        padding: 12,
-                        cornerRadius: 8,
-                        callbacks: {
-                            label: function(context) {
-                                return context.label + ': ' + context.parsed.toFixed(1) + '%';
-                            }
+                    scales: { 
+                        y: { 
+                            beginAtZero: true, 
+                            ticks: { precision: 0 },
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                        },
+                        x: {
+                            grid: { display: false }
                         }
                     }
                 }
+            });
+        }
+
+        // Tag Chart
+        const tagCtx = document.getElementById('tagChart');
+        if (tagCtx && templateData.tagCounts && Object.keys(templateData.tagCounts).length > 0) {
+            const maxTags = 10;
+            const sortedTags = Object.entries(templateData.tagCounts).sort((a, b) => b[1] - a[1]);
+            const topTags = sortedTags.slice(0, maxTags);
+            const otherTags = sortedTags.slice(maxTags);
+            const tagLabels = topTags.map(t => t[0]);
+            const tagData = topTags.map(t => t[1]);
+            const palette = [
+                '#f56565', '#f97316', '#ed8936', '#d69e2e', '#fbd38d',
+                '#ecc94b', '#68d391', '#38b2ac', '#81e6d9', '#63b3ed',
+                '#4299e1', '#667eea', '#9f7aea', '#a78bfa',
+                '#c084fc', '#b794f6'
+            ];
+
+            const backgroundColors = palette.slice(0, topTags.length);
+            
+            if (otherTags.length > 0) {
+                const otherSum = otherTags.reduce((sum, t) => sum + t[1], 0);
+                tagLabels.push('Other');
+                tagData.push(otherSum);
+                backgroundColors.push('#cbd5e0'); 
             }
-        });
-    }
+            
+            new Chart(tagCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: tagLabels,
+                    datasets: [{
+                        data: tagData,
+                        backgroundColor: backgroundColors,
+                        borderWidth: 3,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { 
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: { size: 13, weight: '600' },
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            cornerRadius: 8
+                        }
+                    }
+                }
+            });
+        }
+    });
 </script>
 {% endblock %}

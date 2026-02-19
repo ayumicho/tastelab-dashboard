@@ -1,0 +1,228 @@
+/* ==================== Document Content Containers ==================== */
+.tos-content,
+.pp-content {
+    background: white;
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+
+/* ==================== Section Structure ==================== */
+.tos-section,
+.pp-section {
+    margin-bottom: 2.5rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 2px solid #FFEBD6;
+}
+
+.tos-section:last-child,
+.pp-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+
+/* ==================== Section Titles ==================== */
+.tos-section-title,
+.pp-section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #292524;
+    margin: 0 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.tos-section-title::before,
+.pp-section-title::before {
+    content: '';
+    width: 4px;
+    height: 1.5rem;
+    background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+    border-radius: 2px;
+}
+
+.tos-subsection-title,
+.pp-subsection-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 1.5rem 0 0.75rem 0;
+}
+
+
+/* ==================== Typography & Text ==================== */
+.tos-text,
+.pp-text {
+    color: #4a5568;
+    line-height: 1.8;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.tos-text strong,
+.pp-text strong {
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.pp-text em {
+    color: #4a5568;
+    font-style: italic;
+}
+
+
+/* ==================== Lists ==================== */
+.tos-list,
+.pp-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0;
+}
+
+.tos-list li,
+.pp-list li {
+    color: #4a5568;
+    line-height: 1.8;
+    margin-bottom: 0.75rem;
+    padding-left: 1.75rem;
+    position: relative;
+    font-size: 0.95rem;
+}
+
+.tos-list li::before,
+.pp-list li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: #F4A261;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+
+/* ==================== Table of Contents ==================== */
+.toc-box,
+.pp-toc-box {
+    background: linear-gradient(135deg, #FFF8F3 0%, #FFFAF0 100%);
+    border: 2px solid #FFE4CC;
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2rem 0;
+}
+
+.toc-title,
+.pp-toc-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+}
+
+.toc-list,
+.pp-toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    columns: 2;
+    gap: 2rem;
+}
+
+.toc-list li,
+.pp-toc-list li {
+    margin-bottom: 0.75rem;
+    break-inside: avoid;
+}
+
+.toc-list a,
+.pp-toc-list a {
+    color: #ed8936;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.toc-list a:hover,
+.pp-toc-list a:hover {
+    color: #dd6b20;
+    text-decoration: underline;
+}
+
+
+/* ==================== Highlight & Info Boxes ==================== */
+.tos-highlight,
+.pp-highlight {
+    background: linear-gradient(to right, #FFF8F3, #FFFAF0);
+    border-left: 4px solid #F4A261;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+    color: #2d3748;
+}
+
+.pp-summary-box {
+    background: linear-gradient(135deg, #FFF8F3 0%, #FFFAF0 100%);
+    border: 2px solid #FFE4CC;
+    border-radius: 12px;
+    padding: 1.75rem;
+    margin-bottom: 1rem;
+}
+
+.pp-summary-box p {
+    margin: 0 0 0.75rem 0;
+    color: #4a5568;
+    line-height: 1.8;
+    font-size: 0.95rem;
+}
+
+.pp-summary-box p:last-child {
+    margin-bottom: 0;
+}
+
+.pp-summary-box a {
+    color: #ed8936;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.pp-summary-box a:hover {
+    color: #dd6b20;
+    text-decoration: underline;
+}
+
+
+/* ==================== Contact Information Boxes ==================== */
+.tos-contact-box,
+.pp-contact-box {
+    background: linear-gradient(135deg, #FFF8F3 0%, #FFFAF0 100%);
+    border: 2px solid #FFE4CC;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 1rem;
+}
+
+.contact-info {
+    color: #2d3748;
+    line-height: 2;
+    font-weight: 500;
+}
+
+.contact-info strong {
+    color: #292524;
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.contact-info a {
+    color: #ed8936;
+    text-decoration: none;
+}
+
+.contact-info a:hover {
+    color: #dd6b20;
+}

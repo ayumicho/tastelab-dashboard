@@ -2,16 +2,16 @@ class Tables:
     USERS = "users"
     EXPERIMENTS = "experiments"
     NLP_ANALYSIS = "nlp_analysis"
-    EMOTION_SUMMARY = "emotion_summary"
+    EMOTION_DATA = "emotion_data"
     TIMELINE_SEGMENTS = "timeline_segments"
     CHART_BINS = "chart_bins"
-    TRANSCRIPT_SUMMARIES = "transcript_summaries"
+    TRANSCRIPT_SUMMARY = "transcript_summary"
     KEYWORDS = "keywords"
     TOPIC_SENTIMENTS = "topic_sentiments"
     DETECTED_QUESTIONS = "detected_questions"
     DETECTED_ACTIONS = "detected_actions"
     TEXT_INSIGHTS = "text_insights"
-
+    TRACKING_ANALYSIS = "tracking_analysis"
 
 class Columns:
     # shared
@@ -33,8 +33,10 @@ class Columns:
     TAGS = "tags"
     PARTICIPANT_COUNT = "participant_count"
     DURATION = "duration"
-    AVG_SCORE = "avg_score"
     STATUS = "status"
+
+    # Tracking / CV Analysis
+    DETECTIONS = "detections"
 
     # nlp analysis
     SOURCE_FILENAME = "source_filename"
@@ -73,7 +75,7 @@ class Columns:
     FORMATTED_END = "formatted_end"
 
     # transcript summary
-    CONTENT = "content"
+    SUMMARY = "summary"
     LENGTH_PROFILE = "length_profile"
     NUM_SEGMENTS = "num_segments"
 
@@ -104,3 +106,5 @@ class Columns:
     IMPORTANT_SENTENCES = "important_sentences"
     AVG_SENTENCE_LENGTH = "avg_sentence_length"
     AVG_WORD_LENGTH = "avg_word_length"
+    ACTION_ITEMS = "action_items"
+    MULTI_EMOTION_SEGMENTS = "multi_emotion_segments"

@@ -1,417 +1,731 @@
 {% extends "base.html" %}
 
-{% block title %} Object Detection {% endblock %}
+{% block title %} Detection & Tracking Analysis{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/base.css')}}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/detection-tracking.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
+<!-- Header (Orange) -->
 <div class="container-fluid py-4">
-    <div class="header">
-        <div>
-            <h1 class="header-title">Object Detection & Tracking</h1>
-            <p class="header-subtitle">Upload experiment video for participants detection and movement analysis</p>
+    <div class="header-section">
+        <div class="header-content">
+            <div class="dashboard-section">
+                <h1 class="dashboard-title">Detection & Tracking</h1>
+                <p class="dashboard-subtitle">Movement analysis and participant tracking</p>
+            </div>
         </div>
     </div>
 
-    <div class="main-card">
-        <!-- Upload Section -->
-        <div id="uploadSection">
-            <div class="upload-card">
-                <div class="upload-area" id="uploadArea">
-                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                        <circle cx="12" cy="13" r="4"></circle>
-                    </svg>
-                    <h3 style="font-size: 1.3rem; font-weight: 600; color: #2d3748; margin-bottom: 0.5rem;">Upload Experiment Video</h3>
-                    <p style="color: #718096; margin-bottom: 1.5rem;">Upload MP4 recording for participants detection analysis</p>
-                    <button class="btn-primary" onclick="document.getElementById('videoInput').click()">
-                        Select Video File
+    <!-- Select and experiment dropdown -->    
+    <div class="overview-card">
+        <div class="overview-bar">
+            <div class="overview-title-bar">
+                <i class="fas fa-filter"></i>
+                <h3>Select Experiment to View</h3>
+            </div>
+            <div class="overview-actions">
+                <form id="syncForm" method="POST" action="{{ url_for('views.manual_sync') }}" style="display: inline;">
+                    <button type="submit" class="btn-icon" title="Sync Data">
+                        <i class="fas fa-sync"></i>
                     </button>
-                    <input type="file" id="videoInput" class="file-input" accept="video/mp4" onchange="handleVideoSelect(event)">
-                    <p style="color: #718096; font-size: 0.85rem; margin-top: 1rem;">
-                        Supported format: MP4 • Max size: 2GB
-                    </p>
+                </form>
+            </div>
+        </div>
+        <div class="overview-content">
+            <div class="experiment-dropdown" id="experimentSelect">
+                <div class="dropdown-selected">
+                    {% if selected_experiment %}
+                        {{ selected_experiment.title }} ({{ selected_experiment.date.strftime('%b %d, %Y') }})
+                    {% else %}
+                        Select Experiment
+                    {% endif %}
+                    <i class="fas fa-chevron-down"></i>
                 </div>
+                <div class="dropdown-options">
+                    {% if experiments %}
+                        {% for exp in experiments %}
+                        <div class="dropdown-option {% if selected_experiment and selected_experiment.id == exp.id %}active{% endif %}" 
+                            data-value="{{ exp.id }}">
+                            {{ exp.title }} ({{ exp.date.strftime('%b %d, %Y') }})
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="dropdown-option disabled">No experiments available</div>
+                    {% endif %}
+                </div>    
+            </div>
+        </div>
+    </div>
 
-                <div class="file-info" id="fileInfo">
-                    <strong>Selected file:</strong> <span id="fileName"></span><br>
-                    <strong>Size:</strong> <span id="fileSize"></span><br>
-                    <button class="btn-primary" style="margin-top: 1rem;" onclick="processVideo()">Run Object Detection</button>
+    {% if tracking_analysis %}
+    <!-- Mini stats -->
+    <div class="stats-strip">
+        <div class="mini-stat-card">
+            <span class="mini-stat-value" id="participantCount">0</span>
+            <span class="mini-stat-label">Participants</span>
+        </div>
+        <div class="mini-stat-card">
+            <span class="mini-stat-value" id="totalVisits">0</span>
+            <span class="mini-stat-label">Total Visits</span>
+        </div>
+        <div class="mini-stat-card">
+            <span class="mini-stat-value" id="avgConfidence">0.00</span>
+            <span class="mini-stat-label">Avg Confidence</span>
+        </div>
+        <div class="mini-stat-card">
+            <span class="mini-stat-value" id="totalDuration">0:00</span>
+            <span class="mini-stat-label">Total Duration</span>
+        </div>
+    </div>
+
+    <div class="tracking-dashboard">
+        <!-- Heatmap -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-map-marker-alt"></i> Movement Heatmap</h3>
+            </div>
+
+            <div class="control-bar">
+                <span style="font-size: 0.9rem; font-weight: 600; color: #475569;">Filtering:</span>
+                <select id="personFilter" class="filter-select" style="padding: 0.3rem 2rem 0.3rem 0.8rem;">
+                    <option value="all">All Participants</option>
+                </select>
+            </div>
+
+            <div class="heatmap-wrapper">
+                <svg id="heatmapSvg" viewBox="0 0 600 600" style="width: 100%; border-radius: 12px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
+                    <defs>
+                        <pattern id="heatGrid" width="30" height="30" patternUnits="userSpaceOnUse">
+                            <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#e2e8f0" stroke-width="0.5"/>
+                        </pattern>
+                        <radialGradient id="heatGrad1" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#48bb78" stop-opacity="0.6"/>
+                            <stop offset="70%" stop-color="#48bb78" stop-opacity="0.2"/>
+                            <stop offset="100%" stop-color="#48bb78" stop-opacity="0"/>
+                        </radialGradient>
+                        <radialGradient id="heatGrad2" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#48bb78" stop-opacity="0.6"/>
+                            <stop offset="70%" stop-color="#48bb78" stop-opacity="0.2"/>
+                            <stop offset="100%" stop-color="#48bb78" stop-opacity="0"/>
+                        </radialGradient>
+                        <radialGradient id="heatGrad3" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#48bb78" stop-opacity="0.6"/>
+                            <stop offset="70%" stop-color="#48bb78" stop-opacity="0.2"/>
+                            <stop offset="100%" stop-color="#48bb78" stop-opacity="0"/>
+                        </radialGradient>
+                        <radialGradient id="heatGrad4" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#48bb78" stop-opacity="0.6"/>
+                            <stop offset="70%" stop-color="#48bb78" stop-opacity="0.2"/>
+                            <stop offset="100%" stop-color="#48bb78" stop-opacity="0"/>
+                        </radialGradient>
+                    </defs>
+                    
+                    <rect width="600" height="600" fill="#f7fafc"/>
+                    <rect width="600" height="600" fill="url(#heatGrid)"/>
+                    <rect x="50" y="50" width="500" height="500" fill="white" stroke="#2d3748" stroke-width="4"/>
+                    
+                    <g id="heatmapZones" style="mix-blend-mode: multiply;">
+                        <circle id="heatZone1" cx="535" cy="535" r="280" fill="url(#heatGrad1)"/>
+                        <circle id="heatZone2" cx="535" cy="300" r="280" fill="url(#heatGrad2)"/>
+                        <circle id="heatZone3" cx="65" cy="65" r="280" fill="url(#heatGrad3)"/>
+                        <circle id="heatZone4" cx="65" cy="300" r="280" fill="url(#heatGrad4)"/>
+                    </g>
+
+                    <g id="furnitureOverlay">
+                        <rect x="250" y="70" width="100" height="40" fill="#e2e8f0" stroke="#718096" stroke-width="2" rx="4"/>
+                        <text x="300" y="95" text-anchor="middle" font-size="9" fill="#4a5568" font-weight="600">Food Station</text>
+                        <rect x="100" y="200" width="70" height="90" fill="#e2e8f0" stroke="#718096" stroke-width="2" rx="4" transform="rotate(40 300 250)"/>
+                        <rect x="100" y="240" width="70" height="90" fill="#e2e8f0" stroke="#718096" stroke-width="2" rx="4" transform="rotate(0 140 250)"/>
+                        <rect x="100" y="400" width="70" height="90" fill="#e2e8f0" stroke="#718096" stroke-width="2" rx="4" transform="rotate(-25 160 400)"/>
+                        <rect x="300" y="410" width="180" height="80" fill="#f7fafc" stroke="#718096" stroke-width="3" rx="4"/>
+                        <circle cx="480" cy="140" r="35" fill="#f7fafc" stroke="#718096" stroke-width="2"/>
+                        
+                        <rect x="547" y="180" width="6" height="80" fill="#ea860b" stroke="none" rx="2"/>
+                        <text x="540" y="220" text-anchor="end" font-size="10" fill="#ea860b" font-weight="700">DOOR</text>
+                    </g>
+
+                    <g id="activePeople"></g>
+                    
+                    <g id="cameraLabels">
+                        <circle id="camDot1" cx="535" cy="535" r="20" fill="#48bb78" stroke="white" stroke-width="3"/>
+                        <text x="535" y="540" text-anchor="middle" font-size="9" fill="white" font-weight="700">CAM1</text>
+
+                        <circle id="camDot2" cx="535" cy="300" r="20" fill="#48bb78" stroke="white" stroke-width="3"/>
+                        <text x="535" y="305" text-anchor="middle" font-size="9" fill="white" font-weight="700">CAM2</text>
+
+                        <circle id="camDot3" cx="65" cy="65" r="20" fill="#48bb78" stroke="white" stroke-width="3"/>
+                        <text x="65" y="70" text-anchor="middle" font-size="9" fill="white" font-weight="700">CAM3</text>
+
+                        <circle id="camDot4" cx="65" cy="300" r="20" fill="#48bb78" stroke="white" stroke-width="3"/>
+                        <text x="65" y="305" text-anchor="middle" font-size="9" fill="white" font-weight="700">CAM4</text>
+                    </g>
+                </svg>
+                
+                <div class="color-scale">
+                    <span class="scale-label">Low Activity</span>
+                    <div class="scale-bar"></div>
+                    <span class="scale-label">High Activity</span>
+                </div>
+            </div>
+
+            <div class="timeline-container" id="timelineControl">
+                <div class="playback-controls">
+                    <button class="play-btn" id="playPauseBtn"><i class="fas fa-play" style="font-size: 0.8rem; margin-left: 2px;"></i></button>
+                    <span id="currentTime" style="font-family: monospace; font-weight: 600; color: #475569; width: 50px;">00:00</span>
+                    <input type="range" id="timelineSlider" min="0" max="1000" value="0">
+                    <span id="totalTime" style="font-family: monospace; color: #94a3b8; font-size: 0.9rem;">--:--</span>
                 </div>
             </div>
         </div>
 
-        <!-- Processing Section -->
-        <div class="processing-card" id="processingSection">
-            <div class="spinner"></div>
-            <h3 style="color: #2d3748; margin-bottom: 0.5rem;">Running Object Detection...</h3>
-            <p style="color: #718096;">Analyzing video and detecting participants positions</p>
-            <div style="margin-top: 1.5rem; max-width: 400px; margin-left: auto; margin-right: auto;">
-                <div style="background: #e2e8f0; height: 8px; border-radius: 4px; overflow: hidden;">
-                    <div id="progressBar" style="background: linear-gradient(135deg, #667eea, #764ba2); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+        <div class="analytics-section">
+            
+            <div class="dashboard-card" style="height: auto;">
+                <div class="card-header" style="margin-bottom: 0.5rem;">
+                    <h3 class="card-title"><i class="fas fa-chart-pie"></i> Zone Occupancy</h3>
                 </div>
-                <p style="color: #718096; font-size: 0.85rem; margin-top: 0.5rem;"><span id="progressText">0%</span> complete</p>
-            </div>
-        </div>
-
-        <!-- Results Section -->
-        <div class="results-section" id="resultsSection">
-            <!-- Summary Statistics -->
-            <div class="summary-stats">
-                <div class="stat-box">
-                    <div class="stat-number">12</div>
-                    <div class="stat-label">Participants</div>
-                </div>
-
-                <div class="stat-box">
-                    <div class="stat-number">847</div>
-                    <div class="stat-label">Total Detections</div>
-                </div>
-
-                <div class="stat-box">
-                    <div class="stat-number">95%</div>
-                    <div class="stat-label">Avg. Confidence</div>
-                </div>
-
-                <div class="stat-box">
-                    <div class="stat-number">12:45</div>
-                    <div class="stat-label">Video Duration</div>
-                </div>
+                <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 1rem;">Percentage of total tracked time spent in each camera zone.</p>
+                <table class="zone-table">
+                    <thead>
+                        <tr>
+                            <th>Zone</th>
+                            <th>Time Share</th>
+                            <th style="width: 60px;">%</th>
+                        </tr>
+                    </thead>
+                    <tbody id="zoneStatsBody">
+                    </tbody>
+                </table>
             </div>
 
-            <!-- Interactive Floor Plan -->
-            <div class="floor-plan-card">
-                <h3 class="card-title">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                    </svg>
-                    Lab Floor Plan - Detection Visualization
-                </h3>
-
-                <div class="floor-plan-wrapper">
-                    <svg viewBox="0 0 600 600" style="width: 100%; max-width: 800px; margin: 0 auto; display: block; border-radius: 12px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
-                        <!-- Grid background -->
-                        <defs>
-                            <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
-                                <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#e2e8f0" stroke-width="0.5"/>
-                            </pattern>
-                        </defs>
-                        <rect width="600" height="600" fill="#f7fafc"/>
-                        <rect width="600" height="600" fill="url(#grid)"/>
-                        
-                        <!-- Lab walls -->
-                        <rect x="50" y="50" width="500" height="500" fill="white" stroke="#2d3748" stroke-width="6"/>
-                        
-                        <!-- Food station (top center) -->
-                        <rect x="250" y="70" width="100" height="40" fill="#a0aec0" stroke="#718096" stroke-width="2" rx="4"/>
-                        <text x="300" y="95" text-anchor="middle" font-size="10" fill="#2d3748" font-weight="600">Food Station</text>
-                        
-                        <!-- Sink area (top right) -->
-                        <rect x="450" y="70" width="60" height="40" fill="#cbd5e0" stroke="#718096" stroke-width="2" rx="4"/>
-                        
-                        <!-- Tasting table 1 (left side) -->
-                        <rect x="100" y="200" width="80" height="100" fill="#a0aec0" stroke="#718096" stroke-width="2" rx="4" transform="rotate(-25 140 250)"/>
-                        
-                        <!-- Tasting table 2 (left-center) -->
-                        <rect x="120" y="350" width="80" height="100" fill="#a0aec0" stroke="#718096" stroke-width="2" rx="4" transform="rotate(-25 160 400)"/>
-                        
-                        <!-- Round central table -->
-                        <circle cx="300" cy="280" r="60" fill="none" stroke="#718096" stroke-width="3"/>
-                        <circle cx="300" cy="280" r="45" fill="none" stroke="#718096" stroke-width="2"/>
-                        
-                        <!-- Large rectangular table (center-right) -->
-                        <rect x="320" y="350" width="120" height="60" fill="none" stroke="#718096" stroke-width="3" rx="4"/>
-                        <!-- Table chairs -->
-                        <circle cx="340" cy="335" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
-                        <circle cx="370" cy="335" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
-                        <circle cx="400" cy="335" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
-                        <circle cx="430" cy="335" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
-                        <circle cx="340" cy="425" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
-                        <circle cx="370" cy="425" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
-                        <circle cx="400" cy="425" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
-                        <circle cx="430" cy="425" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
-                        
-                        <!-- Round table with chairs (right side) -->
-                        <circle cx="480" cy="240" r="35" fill="none" stroke="#718096" stroke-width="2"/>
-                        <circle cx="480" cy="205" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
-                        <circle cx="515" cy="240" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
-                        <circle cx="480" cy="275" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
-                        <circle cx="445" cy="240" r="8" fill="#cbd5e0" stroke="#718096" stroke-width="1"/>
-                        
-                        <!-- Camera positions -->
-                        <circle cx="540" cy="300" r="18" fill="#667eea" stroke="white" stroke-width="3"/>
-                        <text x="540" y="305" text-anchor="middle" font-size="14" fill="white" font-weight="700">1</text>
-                        
-                        <circle cx="150" cy="535" r="18" fill="#667eea" stroke="white" stroke-width="3"/>
-                        <text x="150" y="540" text-anchor="middle" font-size="14" fill="white" font-weight="700">2</text>
-                        
-                        <circle cx="450" cy="535" r="18" fill="#667eea" stroke="white" stroke-width="3"/>
-                        <text x="450" y="540" text-anchor="middle" font-size="14" fill="white" font-weight="700">3</text>
-                        
-                        <circle cx="65" cy="300" r="18" fill="#667eea" stroke="white" stroke-width="3"/>
-                        <text x="65" y="305" text-anchor="middle" font-size="14" fill="white" font-weight="700">4</text>
-                        
-                        <circle cx="150" cy="65" r="18" fill="#667eea" stroke="white" stroke-width="3"/>
-                        <text x="150" y="70" text-anchor="middle" font-size="14" fill="white" font-weight="700">5</text>
-                        
-                        <circle cx="450" cy="65" r="18" fill="#667eea" stroke="white" stroke-width="3"/>
-                        <text x="450" y="70" text-anchor="middle" font-size="14" fill="white" font-weight="700">6</text>
-                        
-                        <!-- Detection markers (can be added dynamically) -->
-                        <g id="detectionMarkers">
-                            <circle cx="200" cy="250" r="8" fill="#48bb78" stroke="white" stroke-width="2" class="person-dot" data-time="10:23">
-                                <title>Person detected at 10:23</title>
-                            </circle>
-                            <circle cx="280" cy="320" r="8" fill="#48bb78" stroke="white" stroke-width="2" class="person-dot" data-time="10:24">
-                                <title>Person detected at 10:24</title>
-                            </circle>
-                            <circle cx="350" cy="280" r="8" fill="#48bb78" stroke="white" stroke-width="2" class="person-dot" data-time="10:25">
-                                <title>Person detected at 10:25</title>
-                            </circle>
-                            <circle cx="420" cy="200" r="8" fill="#48bb78" stroke="white" stroke-width="2" class="person-dot" data-time="10:26">
-                                <title>Person detected at 10:26</title>
-                            </circle>
-                            <circle cx="300" cy="450" r="8" fill="#48bb78" stroke="white" stroke-width="2" class="person-dot" data-time="10:27">
-                                <title>Person detected at 10:27</title>
-                            </circle>
-                            <circle cx="180" cy="380" r="8" fill="#48bb78" stroke="white" stroke-width="2" class="person-dot" data-time="10:28">
-                                <title>Person detected at 10:28</title>
-                            </circle>
-                        </g>
-                    </svg>
+            <div class="dashboard-card" style="flex: 1; display: flex; flex-direction: column;">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-users"></i> Participants</h3>
                 </div>
-
-                <!-- Timeline Scrubber -->
-                <div class="timeline-scrubber">
-                    <div class="timeline-label">
-                        <span>Video Timeline</span>
-                        <span id="currentTime" style="color: #667eea; font-weight: 700;">00:00</span>
-                    </div>
-                    <input type="range" class="timeline-slider" id="timelineSlider" min="0" max="100" value="0">
-                    <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.85rem; color: #718096;">
-                        <span>00:00</span>
-                        <span>12:45</span>
-                    </div>
-                </div>
-            </div>
-<!-- 
-            Zone Occupancy Analysis
-            <div class="floor-plan-card">
-                <h3 class="card-title">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="18" height="18" rx="2"></rect>
-                    </svg>
-                    Zone Occupancy Analysis
-                </h3>
-
-                <div class="zone-grid">
-                    <div class="zone-card">
-                        <div class="zone-name">Central Area</div>
-                        <div class="zone-count">3</div>
-                        <div class="zone-label">detections</div>
-                    </div>
-
-                    <div class="zone-card">
-                        <div class="zone-name">Tasting Tables</div>
-                        <div class="zone-count">12</div>
-                        <div class="zone-label">detections</div>
-                    </div>
-
-                    <div class="zone-card">
-                        <div class="zone-name">Food Station</div>
-                        <div class="zone-count">10</div>
-                        <div class="zone-label">detections</div>
-                    </div>
-
-                    <div class="zone-card">
-                        <div class="zone-name">Entry/Exit</div>
-                        <div class="zone-count">24</div>
-                        <div class="zone-label">detections</div>
-                    </div>
-
-                    <div class="zone-card">
-                        <div class="zone-name">Waiting Area</div>
-                        <div class="zone-count">98</div>
-                        <div class="zone-label">detections</div>
-                    </div>
-
-                    <div class="zone-card">
-                        <div class="zone-name">Survey Area</div>
-                        <div class="zone-count">124</div>
-                        <div class="zone-label">detections</div>
-                    </div>
-                </div>
-            </div> -->
-
-            <!-- Occupancy Over Time -->
-            <!-- <div class="chart-card">
-                <h3 class="card-title">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="12" y1="20" x2="12" y2="10"></line>
-                        <line x1="18" y1="20" x2="18" y2="4"></line>
-                        <line x1="6" y1="20" x2="6" y2="16"></line>
-                    </svg>
-                    Occupancy Over Time
-                </h3>
-
-                <div class="chart-container">
-                    <canvas id="occupancyChart"></canvas>
-                </div>
-            </div> -->
-
-            <!-- Movement Heatmap -->
-            <div class="chart-card">
-                <h3 class="card-title">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <circle cx="12" cy="12" r="6"></circle>
-                        <circle cx="12" cy="12" r="2"></circle>
-                    </svg>
-                    Movement Heatmap
-                </h3>
-
-                <div style="width: 100%; max-width: 800px; margin: 0 auto; aspect-ratio: 16/9; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #667eea; font-weight: 600;">
-                    Heatmap Visualization (Areas with most activity highlighted)
+                <div class="scrollable-list" id="participantsList">
                 </div>
             </div>
         </div>
     </div>
+    {% else %}
+    <div class="text-center py-5">
+        <div style="background: #f1f5f9; width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+            <i class="fa-solid fa-eye-slash" style="font-size: 3rem; color: #94a3b8;"></i>
+        </div>
+        <h3 style="color: #334155; font-weight: 700;">No Data Available</h3>
+        <p style="color: #64748b;">Please select an experiment with processed tracking data to view the visualization.</p>
+    </div>
+    {% endif %}
 </div>
-<br/><br/><br/>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<div class="loading-overlay" id="syncOverlay">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">Syncing with MinIO...</p>
+</div>
+
 <script>
-    // Upload area interactions
-    const uploadArea = document.getElementById('uploadArea');
-    const videoInput = document.getElementById('videoInput');
+let trackingData = null;
+let currentPersonFilter = 'all';
+let isPlaying = false;
+let playbackInterval;
+let colorPalette = [
+    '#ed8936', '#f97316', '#fb923c', '#fbbf24', '#fcd34d',
+    '#bfdbfe', '#93c5fd', '#60a5fa', '#3b82f6', '#1d4ed8'
+];
+let isFinished = false;
 
-    uploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadArea.classList.add('dragover');
-    });
+document.addEventListener('DOMContentLoaded', async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlExpId = urlParams.get('exp_id');
+    const storedExpId = localStorage.getItem('active_exp_id');
 
-    uploadArea.addEventListener('dragleave', () => {
-        uploadArea.classList.remove('dragover');
-    });
-
-    uploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadArea.classList.remove('dragover');
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            handleFile(files[0]);
+    if (urlExpId) {
+        if (urlExpId !== storedExpId) {
+            localStorage.setItem('active_exp_id', urlExpId);
         }
-    });
-
-    function handleVideoSelect(event) {
-        const file = event.target.files[0];
-        handleFile(file);
+    } else if (storedExpId) {
+        window.location.search = `?exp_id=${storedExpId}`;
+        return;
     }
 
-    function handleFile(file) {
-        if (file && file.type === 'video/mp4') {
-            document.getElementById('fileName').textContent = file.name;
-            document.getElementById('fileSize').textContent = formatFileSize(file.size);
-            document.getElementById('fileInfo').classList.add('active');
-        } else {
-            alert('Please select a valid MP4 file');
-        }
-    }
+    const dropdown = document.getElementById('experimentSelect');
+    if (dropdown) {
+        const trigger = dropdown.querySelector('.dropdown-selected');
+        const items = dropdown.querySelectorAll('.dropdown-option:not(.disabled)');
 
-    function formatFileSize(bytes) {
-        if (bytes < 1024) return bytes + ' B';
-        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
-        if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-        return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
-    }
-
-    function processVideo() {
-        document.getElementById('uploadSection').style.display = 'none';
-        document.getElementById('processingSection').classList.add('active');
-
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += 5;
-            document.getElementById('progressBar').style.width = progress + '%';
-            document.getElementById('progressText').textContent = progress + '%';
-
-            if (progress >= 100) {
-                clearInterval(interval);
-                setTimeout(() => {
-                    document.getElementById('processingSection').classList.remove('active');
-                    document.getElementById('resultsSection').classList.add('active');
-                    initializeCharts();
-                }, 500);
-            }
-        }, 200);
-    }
-
-    // Timeline scrubber
-    const timelineSlider = document.getElementById('timelineSlider');
-    const currentTimeDisplay = document.getElementById('currentTime');
-
-    if (timelineSlider) {
-        timelineSlider.addEventListener('input', function() {
-            const totalSeconds = 765; // 12:45 in seconds
-            const currentSeconds = Math.floor((this.value / 100) * totalSeconds);
-            const minutes = Math.floor(currentSeconds / 60);
-            const seconds = currentSeconds % 60;
-            currentTimeDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-            
-            // Update detection markers based on timeline position
-            // This would filter which detection markers are shown
+        trigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdown.classList.toggle('active');
         });
-    }
 
-    function initializeCharts() {
-        // Occupancy over time chart
-        new Chart(document.getElementById('occupancyChart'), {
-            type: 'line',
-            data: {
-                labels: ['0:00', '2:00', '4:00', '6:00', '8:00', '10:00', '12:00'],
-                datasets: [{
-                    label: 'People Count',
-                    data: [8, 15, 23, 28, 32, 25, 18],
-                    borderColor: '#667eea',
-                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                    tension: 0.4,
-                    fill: true,
-                    borderWidth: 3
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Participants Detected'
-                        },
-                        grid: {
-                            color: '#f7fafc'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Time (minutes)'
-                        },
-                        grid: {
-                            color: '#f7fafc'
-                        }
-                    }
+        document.addEventListener('click', function(e) {
+            if (!dropdown.contains(e.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+
+        items.forEach(item => {
+            item.addEventListener('click', function() {
+                const expId = this.getAttribute('data-value');
+                if (expId) {
+                    localStorage.setItem('active_exp_id', expId);
+                    window.location.href = `?exp_id=${expId}`;
                 }
-            }
+            });
         });
     }
+
+    const expId = {% if selected_experiment %}{{ selected_experiment.id }}{% else %}null{% endif %};
+    
+    if(!expId) {
+        console.warn('No experiment selected');
+        return;
+    }
+
+    try {
+        console.log(`Fetching tracking data for experiment ${expId}...`);
+        const response = await fetch(`/api/experiment/${expId}/tracking_data`);
+        
+        if(!response.ok) {
+            console.error(`API error: ${response.status}`);
+            return;
+        }
+        
+        trackingData = await response.json();
+        console.log('Tracking data loaded:', trackingData);
+        
+        if(trackingData && trackingData.people) {
+            initializeDashboard();
+        } else {
+            console.warn('Invalid tracking data structure');
+        }
+    } catch (e) {
+        console.error("Data loading error:", e);
+    }
+});
+
+function initializeDashboard() {
+    if(!trackingData || !trackingData.people) return;
+    
+    populatePersonFilter();
+    updateStats();
+    setupTimeline();
+    setupEventListeners();
+    updateDashboard();
+}
+
+function setupEventListeners() {
+    const personFilter = document.getElementById('personFilter');
+    if(personFilter) {
+        personFilter.addEventListener('change', (e) => {
+            currentPersonFilter = e.target.value;
+            updateDashboard();
+        });
+    }
+}
+
+function updateStats() {
+    if(!trackingData.people) return;
+    
+    const totalPeople = trackingData.people.length;
+    const totalVisits = trackingData.people.reduce((acc, p) => 
+        acc + (p.visits?.length || 0), 0);
+    
+    let confidences = [];
+    trackingData.people.forEach(p => {
+        p.visits?.forEach(v => {
+            confidences.push(v.avg_confidence || 0.5);
+        });
+    });
+    const avgConfidence = confidences.length > 0 
+        ? (confidences.reduce((a, b) => a + b) / confidences.length)
+        : 0;
+    
+    let totalSeconds = 0;
+    
+    if (trackingData.video_duration_seconds) {
+        totalSeconds = trackingData.video_duration_seconds;
+    } else {
+        let minT = Infinity, maxT = 0;
+        trackingData.people.forEach(p => {
+            p.visits?.forEach(v => {
+                try {
+                    const inT = new Date(v.timestamp_in).getTime();
+                    const outT = new Date(v.timestamp_out).getTime();
+                    if (inT < minT) minT = inT;
+                    if (outT > maxT) maxT = outT;
+                } catch(e) {}
+            });
+        });
+        totalSeconds = minT !== Infinity ? (maxT - minT) / 1000 : 0;
+    }
+    
+    const pCount = document.getElementById('participantCount');
+    if(pCount) pCount.innerText = totalPeople;
+
+    const tVisits = document.getElementById('totalVisits');
+    if(tVisits) tVisits.innerText = totalVisits;
+
+    const aConf = document.getElementById('avgConfidence');
+    if(aConf) aConf.innerText = avgConfidence.toFixed(2);
+
+    const tDur = document.getElementById('totalDuration');
+    if(tDur) tDur.innerText = formatTime(totalSeconds);
+}
+
+function populatePersonFilter() {
+    if(!trackingData.people) return;
+    
+    const select = document.getElementById('personFilter');
+    const list = document.getElementById('participantsList');
+    if(!select || !list) return;
+
+    const sortedPeople = [...trackingData.people].sort((a, b) => {
+        const durA = getDuration(a);
+        const durB = getDuration(b);
+        return durB - durA;
+    });
+
+    select.innerHTML = '<option value="all">All Participants</option>';
+    sortedPeople.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.person_id;
+        opt.textContent = `${p.person_id} (${formatTime(getDuration(p))})`;
+        select.appendChild(opt);
+    });
+
+    list.innerHTML = '';
+    sortedPeople.forEach((p, idx) => {
+        const div = document.createElement('div');
+        div.className = 'participant-item';
+        div.onclick = () => {
+            select.value = p.person_id;
+            currentPersonFilter = p.person_id;
+            updateDashboard();
+            document.querySelectorAll('.participant-item').forEach(i => i.classList.remove('active'));
+            div.classList.add('active');
+        };
+        
+        const duration = getDuration(p);
+        const camerasVisited = new Set(p.visits?.map(v => v.camera_id) || []).size;
+        
+        div.innerHTML = `
+            <span class="p-id">
+                <i class="fas fa-user-circle" style="color: ${colorPalette[idx % colorPalette.length]}; margin-right: 8px;"></i>
+                ${p.person_id}
+            </span>
+            <span class="p-time">${camerasVisited} cams • ${formatTime(duration)}</span>
+        `;
+        list.appendChild(div);
+    });
+}
+
+function getDuration(person) {
+    if(!person.visits) return 0;
+    return person.visits.reduce((acc, v) => {
+        try {
+            const start = new Date(v.timestamp_in).getTime();
+            const end = new Date(v.timestamp_out).getTime();
+            return acc + ((end - start) / 1000);
+        } catch(e) {
+            return acc;
+        }
+    }, 0);
+}
+
+function getHeatColor(normalizedValue) {
+    const colors = [
+        { pos: 0, r: 72, g: 187, b: 120 },
+        { pos: 0.35, r: 234, g: 179, b: 8 },
+        { pos: 0.65, r: 237, g: 137, b: 54 },
+        { pos: 1, r: 229, g: 62, b: 62 }
+    ];
+    
+    let lower = colors[0], upper = colors[colors.length - 1];
+    for (let i = 0; i < colors.length - 1; i++) {
+        if (normalizedValue >= colors[i].pos && normalizedValue <= colors[i + 1].pos) {
+            lower = colors[i];
+            upper = colors[i + 1];
+            break;
+        }
+    }
+    
+    const range = upper.pos - lower.pos;
+    const t = range === 0 ? 0 : (normalizedValue - lower.pos) / range;
+    
+    const r = Math.round(lower.r + (upper.r - lower.r) * t);
+    const g = Math.round(lower.g + (upper.g - lower.g) * t);
+    const b = Math.round(lower.b + (upper.b - lower.b) * t);
+    
+    return `rgb(${r}, ${g}, ${b})`;
+}
+
+function updateDashboard() {
+    const filteredPeople = currentPersonFilter === 'all' 
+        ? trackingData.people 
+        : trackingData.people.filter(p => p.person_id === currentPersonFilter);
+
+    const zoneStats = { CAM_01: 0, CAM_02: 0, CAM_03: 0, CAM_04: 0 };
+    let totalTime = 0;
+
+    filteredPeople.forEach(p => {
+        if(!p.visits) return;
+        p.visits.forEach(v => {
+            try {
+                const start = new Date(v.timestamp_in).getTime();
+                const end = new Date(v.timestamp_out).getTime();
+                const duration = Math.max(0, (end - start) / 1000);
+                
+                if(zoneStats[v.camera_id] !== undefined) {
+                    zoneStats[v.camera_id] += duration;
+                    totalTime += duration;
+                }
+            } catch(e) {}
+        });
+    });
+
+    const cameras = ['CAM_01', 'CAM_02', 'CAM_03', 'CAM_04'];
+    const activityScores = cameras.map(cam => zoneStats[cam]);
+    const maxScore = Math.max(...activityScores);
+    const minScore = Math.min(...activityScores);
+
+    const heatGradIds = ['heatGrad1', 'heatGrad2', 'heatGrad3', 'heatGrad4'];
+    const dotIds = ['camDot1', 'camDot2', 'camDot3', 'camDot4'];
+
+    cameras.forEach((cam, idx) => {
+        const val = zoneStats[cam];
+        const normalizedIntensity = maxScore > minScore ? (val - minScore) / (maxScore - minScore) : 0;
+        const color = getHeatColor(normalizedIntensity);
+        const baseOpacity = maxScore > 0 ? 0.3 + normalizedIntensity * 0.5 : 0.15;
+        
+        const grad = document.getElementById(heatGradIds[idx]);
+        if(grad) {
+            grad.innerHTML = `
+                <stop offset="0%" stop-color="${color}" stop-opacity="${baseOpacity}"/>
+                <stop offset="50%" stop-color="${color}" stop-opacity="${baseOpacity * 0.5}"/>
+                <stop offset="80%" stop-color="${color}" stop-opacity="${baseOpacity * 0.15}"/>
+                <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+            `;
+        }
+        
+        const dot = document.getElementById(dotIds[idx]);
+        if(dot) dot.setAttribute('fill', color);
+    });
+
+    const tbody = document.getElementById('zoneStatsBody');
+    if(tbody) {
+        tbody.innerHTML = '';
+        cameras.forEach((cam, idx) => {
+            const time = zoneStats[cam];
+            const pct = totalTime > 0 ? (time / totalTime * 100).toFixed(1) : 0;
+            const normalizedIntensity = maxScore > minScore ? (time - minScore) / (maxScore - minScore) : 0;
+            const color = getHeatColor(normalizedIntensity);
+            
+            tbody.innerHTML += `
+                <tr>
+                    <td>${cam.replace('_', ' ')}</td>
+                    <td>
+                        <div class="zone-bar-bg">
+                            <div class="zone-bar-fill" style="width: ${pct}%; background: ${color};"></div>
+                        </div>
+                    </td>
+                    <td style="font-weight: bold; color: ${color};">${pct}%</td>
+                </tr>
+            `;
+        });
+    }
+}
+
+function setupTimeline() {
+    let minT = Infinity, maxT = 0;
+    
+    trackingData.people?.forEach(p => {
+        p.visits?.forEach(v => {
+            try {
+                const inT = new Date(v.timestamp_in).getTime();
+                const outT = new Date(v.timestamp_out).getTime();
+                if(inT < minT) minT = inT;
+                if(outT > maxT) maxT = outT;
+            } catch(e) {}
+        });
+    });
+
+    if(minT === Infinity) return;
+
+    window.expStart = minT;
+    
+    if (trackingData.video_duration_seconds) {
+        window.expDuration = trackingData.video_duration_seconds * 1000;
+        window.expEnd = window.expStart + window.expDuration;
+    } else {
+        window.expEnd = maxT;
+        window.expDuration = maxT - minT;
+    }
+
+    const totalTimeEl = document.getElementById('totalTime');
+    if(totalTimeEl) totalTimeEl.innerText = formatTime(window.expDuration / 1000);
+
+    const slider = document.getElementById('timelineSlider');
+    if(slider) {
+        slider.addEventListener('input', (e) => {
+            isFinished = false;
+            const pct = e.target.value / 1000;
+            const currentT = window.expStart + (window.expDuration * pct);
+            updateTimelineDisplay(pct);
+            renderLiveDots(currentT);
+        });
+    }
+
+    const playBtn = document.getElementById('playPauseBtn');
+    if(playBtn) playBtn.addEventListener('click', togglePlayback);
+}
+
+function togglePlayback() {
+    const btn = document.getElementById('playPauseBtn');
+    const slider = document.getElementById('timelineSlider');
+    if(!slider || !btn) return;
+    
+    if (isFinished) {
+        slider.value = 0;
+        isFinished = false;
+        updateTimelineDisplay(0);
+        renderLiveDots(window.expStart);
+    }
+    
+    if (isPlaying) {
+        stopPlayback();
+    } else {
+        isPlaying = true;
+        btn.innerHTML = '<i class="fas fa-pause"></i>';
+        
+        playbackInterval = setInterval(() => {
+            let val = parseInt(slider.value);
+            if (val >= 1000) {
+                stopPlayback(true);
+                return;
+            }
+            slider.value = val + 5;
+            
+            const pct = slider.value / 1000;
+            const currentT = window.expStart + (window.expDuration * pct);
+            updateTimelineDisplay(pct);
+            renderLiveDots(currentT);
+        }, 50);
+    }
+}
+
+function stopPlayback(finished = false) {
+    isPlaying = false;
+    isFinished = finished;
+    clearInterval(playbackInterval);
+    
+    const btn = document.getElementById('playPauseBtn');
+    if(btn) {
+        if (finished) {
+            btn.innerHTML = '<i class="fas fa-redo"></i>';
+        } else {
+            btn.innerHTML = '<i class="fas fa-play" style="margin-left: 2px;"></i>';
+        }
+    }
+}
+
+function updateTimelineDisplay(pct) {
+    const sec = Math.floor((window.expDuration / 1000) * pct);
+    const currTimeEl = document.getElementById('currentTime');
+    if(currTimeEl) currTimeEl.innerText = formatTime(sec);
+}
+
+function renderLiveDots(timestamp) {
+    const container = document.getElementById('activePeople');
+    if(!container) return;
+    container.innerHTML = '';
+    
+    const filteredPeople = currentPersonFilter === 'all' 
+        ? trackingData.people 
+        : trackingData.people.filter(p => p.person_id === currentPersonFilter);
+
+    const activeDots = [];
+    
+    filteredPeople.forEach((p, pidx) => {
+        p.visits?.forEach((v, vidx) => {
+            try {
+                const start = new Date(v.timestamp_in).getTime();
+                const end = new Date(v.timestamp_out).getTime();
+                
+                if(timestamp >= start && timestamp <= end) {
+                    activeDots.push({
+                        person: p,
+                        personIdx: pidx,
+                        visit: v,
+                        camera: v.camera_id
+                    });
+                }
+            } catch(e) {}
+        });
+    });
+
+    const cameraPositions = {
+        'CAM_01': { x: 535, y: 535, spreadX: -1, spreadY: -1 },
+        'CAM_02': { x: 535, y: 300, spreadX: -1, spreadY: 0 },
+        'CAM_03': { x: 65, y: 65, spreadX: 1, spreadY: 1 },
+        'CAM_04': { x: 65, y: 300, spreadX: 1, spreadY: 0 }
+    };
+
+    const byCamera = {};
+    activeDots.forEach(dot => {
+        if (!byCamera[dot.camera]) byCamera[dot.camera] = [];
+        byCamera[dot.camera].push(dot);
+    });
+
+    Object.entries(byCamera).forEach(([camera, dots]) => {
+        const pos = cameraPositions[camera];
+        if (!pos) return;
+
+        dots.forEach((dot, idx) => {
+            const row = Math.floor(idx / 3);
+            const col = idx % 3;
+            const spacing = 35;
+            
+            let cx = pos.x + (col * spacing + 50) * pos.spreadX;
+            let cy = pos.y + (row * spacing + 50) * pos.spreadY;
+            
+            cx = Math.max(70, Math.min(530, cx));
+            cy = Math.max(70, Math.min(530, cy));
+            
+            const color = colorPalette[dot.personIdx % colorPalette.length];
+
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", cx);
+            circle.setAttribute("cy", cy);
+            circle.setAttribute("r", "12");
+            circle.setAttribute("fill", color);
+            circle.setAttribute("stroke", "white");
+            circle.setAttribute("stroke-width", "2");
+            circle.setAttribute("opacity", "0.9");
+            
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", cx);
+            text.setAttribute("y", cy + 4);
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("fill", "white");
+            text.setAttribute("font-size", "8");
+            text.setAttribute("font-weight", "600");
+            text.textContent = dot.person.person_id.replace('P00', 'P').replace('P0', 'P');
+
+            container.appendChild(circle);
+            container.appendChild(text);
+        });
+    });
+}
+
+function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
+}
 </script>
 {% endblock %}

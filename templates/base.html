@@ -4,18 +4,34 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="{{ url_for('static', filename='images/buas.gif') }}" rel="icon">
+    <title>{% block title %}TasteLab{% endblock %}</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 
+    <!-- Notyf CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+
     <!-- CSS Links -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
-
-    <!-- Remove redundant Chartist CSS links -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
-    {% block extra_css %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
-    {% endblock %}
+    
+    {% block head %}{% endblock %}
+    {% block extra_css %}{% endblock %}
+
+    <style>
+        /* Custom Notyf styling to match theme */
+        .notyf__toast--success {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .notyf__toast--error {
+            background: linear-gradient(135deg, #f56565 0%, #c53030 100%);
+        }
+        .notyf__toast {
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+    </style>
 
 </head>
 <body>
@@ -27,33 +43,7 @@
             </a>
             <a class="navbar-brand fw-bold" href="/">TasteLab</a>
 
-            <!-- Search Bar (Desktop) -->
-            <!-- <div class="search-container d-none d-lg-block mx-auto">
-                <form role="search" id="searchForm">
-                    <input class="search-input" type="search" placeholder="Search experiments, participants, data..." aria-label="Search" id="searchInput">
-                    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <path d="m21 21-4.35-4.35"></path>
-                    </svg>
-                </form>
-            </div>
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button> -->
-
             <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
-                <!-- Mobile Search Bar -->
-                <!-- <div class="search-container d-lg-none mt-2 mb-2">
-                    <form role="search" id="searchFormMobile">
-                        <input class="search-input" type="search" placeholder="Search..." aria-label="Search">
-                        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <path d="m21 21-4.35-4.35"></path>
-                        </svg>
-                    </form>
-                </div> -->
-
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     {% if user.is_authenticated %}
                     <li class="nav-item">
@@ -94,27 +84,6 @@
         </div>
     </nav>
 
-    <!-- Flash messages -->
-    <div class="flash-message">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    {% if category == 'error' %}
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% else %}
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-    </div>
-
     <div class="content">   
         <!-- Sidebar -->
         {% if user.is_authenticated %}
@@ -139,7 +108,7 @@
                                     </svg>
                                     Dashboard
                                 </a>
-                            </li>
+                            </li>                          
 
                             <div class="sidebar-divider"></div>
                             
@@ -155,7 +124,7 @@
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link" id="transcription" href="/transcription">
+                                <a class="nav-link" id="speech-to-text" href="/speech-to-text">
                                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                         <polyline points="14,2 14,8 20,8"></polyline>
@@ -163,11 +132,23 @@
                                         <line x1="16" y1="17" x2="8" y2="17"></line>
                                         <polyline points="10,9 9,9 8,9"></polyline>
                                     </svg>
-                                    Transcription
+                                    Speech to Text
                                 </a>
                             </li>
 
                             <div class="sidebar-divider"></div>
+
+                            <li class="nav-item">
+                                <a class="nav-link" id="manual-annotation" href="/manual-annotation">
+                                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                    </svg>
+                                    Manual Annotation
+                                </a>
+                            </li>
 
                             <li class="nav-item">
                                 <a class="nav-link" id="detection-tracking" href="/detection-tracking">
@@ -182,16 +163,8 @@
                                     </svg>
                                     Detection & Tracking
                                 </a>
-                            </li>                               
-                            <li class="nav-item">
-                                <a class="nav-link" id="analytics" href="/analytics">
-                                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"></polyline>
-                                    </svg>
-                                    Analytics
-                                </a>
                             </li>
-                            
+
                             <div class="sidebar-divider"></div>
 
                             <li class="nav-item">
@@ -217,74 +190,125 @@
                         </ul>
                     </div>
                 </nav>
+        <!-- This ensures that the sidebar is hidden when a user is nog logged in -->    
+                <main class="col-md-10 ms-sm-auto col-lg-11 ps-md-4 main-content">
+        {% else %}
+        <main style="margin: 0; padding: 0; padding-top: 60px; max-width: 100%;">
+        {% endif %}
+    
+                {% block content %}
+                {% endblock %}
+                
+            </main>
+        {% if user.is_authenticated %}
             </div>
         </div>
         {% endif %}
-                <main class="col-md-10 ms-sm-auto col-lg-11 ps-md-4 main-content">
-                    {% block content %}
-                    {% endblock %}
-                </main>
     </div>
+    
     <!-- Footer -->
-    <footer class="bg-light text-center text-lg-start mt-auto">
-        <div class="container p-4">
-            <div class="row">
-                <div class="col-lg-12 col-md-12 mb-4 mb-md-0">
-                    <ul class="list-inline">
-                        <li class="list-inline-item">
-                            <a href="/privacy-policy">Privacy Policy</a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a href="/terms-of-service">Terms of Service</a>
-                        </li>
-                        <p>&copy; 2025 Taste Lab. All rights reserved.</p>
-                    </ul>
-                </div>
+    <footer class="mt-auto">
+        <div class="container">
+            <div class="footer-content">
+                <p class="footer-copyright">
+                    &copy; 2026 <strong>TasteLab</strong>. All rights reserved.
+                </p>
+                <ul class="footer-links">
+                    <li>
+                        <a href="/privacy-policy">Privacy Policy</a>
+                    </li>
+                    <li>
+                        <a href="/terms-of-service">Terms of Service</a>
+                    </li>
+                </ul>
             </div>
         </div>
     </footer>
 
- <!-- Chartist -->
+    <!-- Chartist -->
     <script src="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
-    <script src="bower_components/chartist/dist/chartist.min.js"></script>
-    <script src="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
 
-<!-- Bootstrap Java Script Links-->
+    <!-- Bootstrap JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
-<!-- Ionicons -->
+    <!-- Ionicons -->
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 
-<!-- Apex Charts -->
+    <!-- Apex Charts -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
-    <script>           
-            // Active sidebar navigation
-            var currentPath = window.location.pathname;
-            $('.sidebar .nav-link').removeClass('active');
+    <!-- Notyf -->
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
 
-            // Match current page to sidebar links
-            if (currentPath === '/' || currentPath === '/dashboard') {
-                $('#dashboard').addClass('active');
-            } else if (currentPath === '/experiments') {
-                $('#experiments').addClass('active');
-            } else if (currentPath === '/transcription') {
-                $('#transcription').addClass('active');
-            } else if (currentPath === '/detection-tracking') {
-                $('#detection-tracking').addClass('active');
-            } else if (currentPath === '/analytics') {
-                $('#analytics').addClass('active');
-            } else if (currentPath === '/profile') {
-                $('#profile').addClass('active');
-            } else if (currentPath === '/help') {
-                $('#help').addClass('active');
-            }
+    <script>
+        // Initialize Notyf
+        const notyf = new Notyf({
+            duration: 5000, // Increased slightly for long sync messages
+            position: { x: 'right', y: 'top' },
+            dismissible: true,
+            types: [
+                {
+                    type: 'warning',
+                    background: '#fbbf24', // Amber/Yellow
+                    icon: {
+                        className: 'fas fa-exclamation-triangle',
+                        tagName: 'i',
+                        color: 'white'
+                    }
+                }
+            ]
+        });
+
+        // Show Flask flash messages
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category == 'error' %}
+                        notyf.error("{{ message | e }}");
+                    {% elif category == 'warning' %}
+                        // Custom warning type defined above
+                        notyf.open({ type: 'warning', message: "{{ message | e }}" });
+                    {% else %}
+                        notyf.success("{{ message | e }}");
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        // Active sidebar navigation
+        var currentPath = window.location.pathname;
+        $('.sidebar .nav-link').removeClass('active');
+
+        if (currentPath === '/' || currentPath === '/dashboard') {
+            $('#dashboard').addClass('active');    
+        } else if (currentPath === '/experiments' || currentPath.startsWith('/experiments/')) {
+            $('#experiments').addClass('active');
+        } else if (currentPath === '/speech-to-text') {
+            $('#speech-to-text').addClass('active');
+        } else if (currentPath === '/detection-tracking') {
+            $('#detection-tracking').addClass('active');
+        } else if (currentPath === '/manual-annotation' || currentPath.startsWith('/manual-annotation/')) {
+            $('#manual-annotation').addClass('active');
+        } else if (currentPath === '/profile') {
+            $('#profile').addClass('active');
+        } else if (currentPath === '/help') {
+            $('#help').addClass('active');
+        }
+    
+        // --- SYNC LOGIC ---
+        const syncForm = document.getElementById('syncForm');
+        const syncOverlay = document.getElementById('syncOverlay');
+        const syncBtnIcon = syncForm ? syncForm.querySelector('.fa-sync') : null;
+
+        if (syncForm && syncOverlay) {
+            syncForm.addEventListener('submit', function(e) {
+                syncOverlay.classList.add('active');
+                if(syncBtnIcon) syncBtnIcon.classList.add('fa-spin');
+            });
+        }
     </script>
 
 </body>

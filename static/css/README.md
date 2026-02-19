@@ -1,481 +1,412 @@
-# CSS Directory
+# TasteLab Dashboard - CSS Documentation
 
-This directory contains all stylesheets for the TasteLab Dashboard. The styling approach combines custom CSS with Bootstrap 5 framework to create a modern, responsive, and accessible user interface.
+This directory contains all stylesheets that power the tastelab dashboard application. The CSS is organized into a base stylesheet used across all pages and feature-specific stylesheets for individual components.
 
-## Overview
-
-The CSS architecture follows a modular approach, separating concerns into distinct files for maintainability and scalability.
-
-## File Structure
+## Directory Structure
 
 ```
-css/
-├── style.css              # Main stylesheet (imports and base styles)
-├── base.css               # Typography, colors, global styles
-├── components/            # Reusable UI components
-│   ├── buttons.css        # Button styles
-│   ├── cards.css          # Card components
-│   ├── forms.css          # Form elements
-│   ├── navbar.css         # Navigation bar
-│   └── modals.css         # Modal dialogs
-├── pages/                 # Page-specific styles
-│   ├── home.css           # Dashboard home
-│   ├── experiments.css    # Experiment pages
-│   ├── profile.css        # User profile
-│   └── auth.css           # Login/signup pages
-├── layouts/               # Layout structures
-│   ├── grid.css           # Grid systems
-│   └── containers.css     # Container layouts
-└── utilities/             # Utility classes
-    ├── spacing.css        # Margins and padding
-    ├── colors.css         # Color utilities
-    └── typography.css     # Text utilities
+static/
+├── css/
+│   ├── base.css                      # Core styles used across all pages
+│   ├── detection-tracking.css        # Participant tracking & heatmap features
+│   ├── docs.css                      # privacy policy & terms of service
+│   ├── experiments.css               # Experiment management & listings
+│   ├── help.css                      # FAQ & support documentation
+│   ├── home.css                      # Dashboard overview page
+│   ├── manual-annotation.css         # Manual labeling interface
+│   ├── profile.css                   # User profile settings
+│   ├── signup.css                    # Authentication pages
+│   ├── single-experiment.css         # Detailed experiment view
+│   └── speech-to-text.css            # NLP transcription & analysis
+└── images/                           # Icons, logos, visual assets
 ```
 
-## Main Stylesheet
+## Base CSS - Global Styles
 
-### `style.css`
-The primary stylesheet that imports all other CSS files and defines core styles:
+**File:** `base.css`
 
-```css
-/* Import base styles */
-@import 'base.css';
+The base stylesheet provides foundational styles used across all HTML pages and includes:
 
-/* Import components */
-@import 'components/buttons.css';
-@import 'components/cards.css';
-/* ... */
-
-/* Import page styles */
-@import 'pages/home.css';
-/* ... */
-```
-
-**Include in templates:**
-```html
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-```
-
-## Design System
+- **Typography** - Headings (h1-h3), text hierarchy, and font weights
+- **Page Layout** - Container, grid system, sidebar, and main content areas
+- **Sidebar Navigation** - Navigation links, active states, and hover effects
+- **Header & Hero Sections** - Gradient headers with decorative backgrounds
+- **Overview Cards** - Dashboard card components with borders and shadows
+- **Search Bar** - Search input styling with icons and focus states
+- **Navbar** - Custom navigation bar styling
+- **Cards** - General card components with hover effects
+- **Dropdown Menus** - Custom dropdown styling
+- **Buttons** - Button variants (primary, secondary, etc.)
+- **Icons & Images** - Icon containers and image styling
+- **Loading & Overlay** - Loading spinners and overlay components
+- **Utilities** - Highlight boxes and helper classes
+- **Animations** - Spin and pulse keyframe animations
+- **Responsive Design** - Media queries for mobile, tablet, and desktop
 
 ### Color Palette
 
-```css
-:root {
-    /* Primary Colors */
-    --primary-color: #2563eb;
-    --primary-hover: #1d4ed8;
-    --primary-light: #dbeafe;
-    
-    /* Secondary Colors */
-    --secondary-color: #64748b;
-    --secondary-hover: #475569;
-    
-    /* Accent Colors */
-    --accent-color: #f59e0b;
-    --success-color: #10b981;
-    --warning-color: #f59e0b;
-    --error-color: #ef4444;
-    --info-color: #3b82f6;
-    
-    /* Neutral Colors */
-    --white: #ffffff;
-    --gray-50: #f9fafb;
-    --gray-100: #f3f4f6;
-    --gray-200: #e5e7eb;
-    --gray-300: #d1d5db;
-    --gray-500: #6b7280;
-    --gray-700: #374151;
-    --gray-900: #111827;
-    --black: #000000;
-    
-    /* Background Colors */
-    --bg-primary: #ffffff;
-    --bg-secondary: #f9fafb;
-    --bg-dark: #1f2937;
-}
-```
-
-### Typography
+The dashboard uses a warm orange/brown color scheme:
 
 ```css
-:root {
-    /* Font Families */
-    --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    --font-mono: 'Fira Code', 'Courier New', monospace;
-    
-    /* Font Sizes */
-    --text-xs: 0.75rem;    /* 12px */
-    --text-sm: 0.875rem;   /* 14px */
-    --text-base: 1rem;     /* 16px */
-    --text-lg: 1.125rem;   /* 18px */
-    --text-xl: 1.25rem;    /* 20px */
-    --text-2xl: 1.5rem;    /* 24px */
-    --text-3xl: 1.875rem;  /* 30px */
-    --text-4xl: 2.25rem;   /* 36px */
-    
-    /* Font Weights */
-    --font-light: 300;
-    --font-normal: 400;
-    --font-medium: 500;
-    --font-semibold: 600;
-    --font-bold: 700;
-    
-    /* Line Heights */
-    --leading-tight: 1.25;
-    --leading-normal: 1.5;
-    --leading-relaxed: 1.75;
-}
+Primary Orange:     #ed8936
+Secondary Orange:   #dd6b20
+Light Orange:       #F4A261
+Lighter Orange:     #F9C5A0
+Text Dark:          #2d3748
+Text Medium:        #718096
+Text Light:         #a0aec0
+Background Light:   #f8f9fa
 ```
 
-### Spacing
+For charts we use:
 
 ```css
-:root {
-    /* Spacing Scale (based on 4px) */
-    --space-1: 0.25rem;  /* 4px */
-    --space-2: 0.5rem;   /* 8px */
-    --space-3: 0.75rem;  /* 12px */
-    --space-4: 1rem;     /* 16px */
-    --space-5: 1.25rem;  /* 20px */
-    --space-6: 1.5rem;   /* 24px */
-    --space-8: 2rem;     /* 32px */
-    --space-10: 2.5rem;  /* 40px */
-    --space-12: 3rem;    /* 48px */
-    --space-16: 4rem;    /* 64px */
-}
+Coral Red:          #f56565
+Vivid Orange:       #f97316
+Pumpkin Orange:     #ed8936
+Peach:              #f6ad55
+Pale Goldenrod:     #fbd38d
+Golden Yellow:      #ecc94b
+Mint Green:         #68d391
+Teal:               #38b2ac
+Aquamarine:         #81e6d9
+Sky Blue:           #63b3ed
+Cerulean Blue:      #4299e1
+Slate Purple:       #667eea
+Light Gray:         #e5e7eb
+Purple:             #9f7aea
+Lilac:              #a78bfa
+Magenta:            #c084fc
+Medium Purple:      #b794f6
 ```
 
-### Border Radius
 
-```css
-:root {
-    --radius-sm: 0.25rem;  /* 4px */
-    --radius-md: 0.5rem;   /* 8px */
-    --radius-lg: 0.75rem;  /* 12px */
-    --radius-xl: 1rem;     /* 16px */
-    --radius-full: 9999px; /* Pill shape */
-}
-```
+## Page-Specific CSS Files
 
-### Shadows
+### 1. **docs.css** (8 sections)
+Styles for privacy policy, terms of service, and documentation pages.
 
-```css
-:root {
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-    --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
-}
-```
+**Includes:**
+- Document layout and typography
+- Section headers and subheaders
+- Lists and bullet points
+- Link styling
 
-## Component Styles
+**Used by:** Privacy Policy, Terms of Service pages
 
-### Buttons
+### 2. **home.css** (15 sections)
+Main dashboard overview page styling.
 
-```css
-.btn {
-    padding: var(--space-2) var(--space-4);
-    border-radius: var(--radius-md);
-    font-weight: var(--font-medium);
-    transition: all 0.2s ease;
-}
+**Includes:**
+- Dashboard cards and metrics display
+- Quick action buttons
+- Overview statistics
+- Card layouts and grid systems
 
-.btn-primary {
-    background-color: var(--primary-color);
-    color: var(--white);
-}
-
-.btn-primary:hover {
-    background-color: var(--primary-hover);
-}
-```
-
-### Cards
-
-```css
-.card {
-    background: var(--bg-primary);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
-    padding: var(--space-6);
-}
-```
-
-### Forms
-
-```css
-.form-control {
-    width: 100%;
-    padding: var(--space-3) var(--space-4);
-    border: 1px solid var(--gray-300);
-    border-radius: var(--radius-md);
-    font-size: var(--text-base);
-}
-
-.form-control:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px var(--primary-light);
-}
-```
-
-## Responsive Design
-
-### Breakpoints
-
-```css
-/* Mobile First Approach */
-/* Extra Small: < 576px (default) */
-/* Small: ≥ 576px */
-@media (min-width: 576px) { }
-
-/* Medium: ≥ 768px */
-@media (min-width: 768px) { }
-
-/* Large: ≥ 992px */
-@media (min-width: 992px) { }
-
-/* Extra Large: ≥ 1200px */
-@media (min-width: 1200px) { }
-
-/* XXL: ≥ 1400px */
-@media (min-width: 1400px) { }
-```
-
-### Responsive Utilities
-
-```css
-/* Hide on mobile */
-.d-none-sm {
-    display: none;
-}
-
-@media (min-width: 768px) {
-    .d-none-sm {
-        display: block;
-    }
-}
-
-/* Mobile-only display */
-.d-mobile-only {
-    display: block;
-}
-
-@media (min-width: 768px) {
-    .d-mobile-only {
-        display: none;
-    }
-}
-```
-
-## Utility Classes
-
-### Spacing Utilities
-
-```css
-/* Margin */
-.m-0 { margin: 0; }
-.m-1 { margin: var(--space-1); }
-.m-2 { margin: var(--space-2); }
-/* ... */
-
-/* Padding */
-.p-0 { padding: 0; }
-.p-1 { padding: var(--space-1); }
-.p-2 { padding: var(--space-2); }
-/* ... */
-```
-
-### Text Utilities
-
-```css
-.text-center { text-align: center; }
-.text-left { text-align: left; }
-.text-right { text-align: right; }
-
-.text-primary { color: var(--primary-color); }
-.text-secondary { color: var(--secondary-color); }
-.text-success { color: var(--success-color); }
-.text-danger { color: var(--error-color); }
-```
-
-### Display Utilities
-
-```css
-.d-none { display: none; }
-.d-block { display: block; }
-.d-inline-block { display: inline-block; }
-.d-flex { display: flex; }
-.d-grid { display: grid; }
-```
-
-## Page-Specific Styles
-
-### Dashboard Home
-
-```css
-/* home.css */
-.dashboard-header {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
-    color: var(--white);
-    padding: var(--space-8);
-    border-radius: var(--radius-lg);
-}
-
-.stats-card {
-    text-align: center;
-    padding: var(--space-6);
-}
-
-.stats-number {
-    font-size: var(--text-4xl);
-    font-weight: var(--font-bold);
-    color: var(--primary-color);
-}
-```
-
-### Experiment Pages
-
-```css
-/* experiments.css */
-.experiment-card {
-    border-left: 4px solid var(--primary-color);
-    transition: transform 0.2s ease;
-}
-
-.experiment-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-}
-
-.experiment-status {
-    display: inline-block;
-    padding: var(--space-1) var(--space-3);
-    border-radius: var(--radius-full);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-}
-```
-
-## Best Practices
-
-### CSS Organization
-
-1. **Use CSS variables** for consistent theming
-2. **Follow BEM naming convention** for component classes
-3. **Keep specificity low** - avoid deep nesting
-4. **Mobile-first responsive design** - use min-width media queries
-5. **Group related styles** together
-
-### Performance
-
-1. **Minimize CSS files** for production
-2. **Remove unused styles** regularly
-3. **Use shorthand properties** when possible
-4. **Avoid @import in production** - concatenate files instead
-5. **Optimize selector performance** - avoid universal selectors
-
-### Maintainability
-
-1. **Comment complex styles** with explanations
-2. **Use consistent formatting** - 2-space indentation
-3. **Organize properties** logically (positioning, box model, typography, visual)
-4. **Keep files focused** - one component per file
-5. **Document custom properties** in comments
-
-## Dark Mode Support
-
-```css
-/* Dark mode variables */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --bg-primary: #1f2937;
-        --bg-secondary: #111827;
-        --text-primary: #f9fafb;
-        --text-secondary: #d1d5db;
-    }
-}
-
-/* Manual dark mode toggle */
-[data-theme="dark"] {
-    --bg-primary: #1f2937;
-    --bg-secondary: #111827;
-    --text-primary: #f9fafb;
-}
-```
-
-## Browser Compatibility
-
-Styles are compatible with:
-- Chrome/Edge (latest 2 versions)
-- Firefox (latest 2 versions)
-- Safari (latest 2 versions)
-- Mobile browsers (iOS Safari, Chrome Mobile)
-
-## Adding New Styles
-
-When adding new CSS:
-
-1. **Determine the appropriate file** (component, page, or utility)
-2. **Use existing variables** from design system
-3. **Follow naming conventions** (BEM for components)
-4. **Test responsiveness** across breakpoints
-5. **Check browser compatibility**
-6. **Document complex styles** with comments
-7. **Update this README** if adding new files
-
-## Common Patterns
-
-### Centered Content
-
-```css
-.center-content {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-}
-```
-
-### Flexible Grid
-
-```css
-.grid-auto {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: var(--space-6);
-}
-```
-
-### Card Hover Effect
-
-```css
-.card-hover {
-    transition: all 0.3s ease;
-}
-
-.card-hover:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-xl);
-}
-```
-
-## Troubleshooting
-
-### Styles not applying
-- Check CSS file is linked in template
-- Verify correct class name spelling
-- Check for specificity conflicts
-- Clear browser cache
-- Inspect element in browser dev tools
-
-### Layout issues
-- Check for conflicting Bootstrap classes
-- Verify parent container has proper display property
-- Use browser dev tools to inspect box model
-- Check for overflow issues
+**Used by:** Dashboard homepage
 
 ---
 
-**Last Updated:** December 2025
+### 3. **detection-tracking.css** (12 sections)
+Participant tracking, heatmaps, and detection analysis.
+
+**Includes:**
+- Heatmap SVG styling
+- Timeline playback controls
+- Zone table formatting
+- Participant tracking indicators
+- Analysis status badges
+
+**Used by:** Tracking & Detection analytics page
+
+---
+### 4. **experiments.css** (17 sections)
+Experiment management and listing pages.
+
+**Includes:**
+- Experiment card layouts
+- Tab navigation styling
+- Search and filter controls
+- Experiment status badges
+- Archive/restore button states
+- Form inputs for experiment creation
+- Empty state messaging
+
+**Used by:** Experiments, Create Experiment pages
+
+---
+
+### 5. **dashboard-detail.css** (13 sections)
+Individual experiment metrics and analytics dashboard.
+
+**Includes:**
+- Quick action card styling
+- Experiment overview cards
+- Analysis metrics with color gradients
+- Chart card wrappers
+- Activity feeds and top experiments lists
+- Status indicators
+- Color-themed small cards
+
+**Used by:** Dashboard detail/metrics view
+
+---
+### 6. **manual-annotation.css** (14 sections)
+Manual data labeling and annotation interface.
+
+**Includes:**
+- Summary statistics boxes
+- Job card layouts with progress bars
+- Annotation modals
+- Person selection grids
+- Image grid for labeling
+- Loading states and toasts
+- Saving overlay animations
+
+**Used by:** Manual annotation/labeling page
+
+---
+
+### 7. **help.css** (10 sections)
+FAQ, help documentation, and support pages.
+
+**Includes:**
+- Topic card grid
+- FAQ accordion styling
+- Content boxes (note, alert, warning)
+- Step-by-step lists
+- Legal section cards
+- Footer contact button
+
+**Used by:** Help & Support documentation page
+
+---
+
+### 8. **profile.css** (10 sections)
+User profile settings and preferences.
+
+**Includes:**
+- Profile header with avatar
+- File upload section with drag-and-drop
+- Form input styling
+- Modal dialogs
+- Security notice boxes
+- Stats cards grid
+
+**Used by:** User Profile page
+
+---
+
+### 9. **signup.css** (13 sections)
+Authentication and registration pages.
+
+**Includes:**
+- Background patterns and gradients
+- Signup/login card styling
+- Form layout and inputs
+- Password strength indicators
+- Validation message styling
+- Submit button with loading state
+- Footer navigation links
+- Success message animations
+
+**Used by:** Login, Signup pages
+
+---
+
+### 10. **single-experiment.css** (15 sections)
+Detailed experiment view with multi-modal analytics.
+
+**Includes:**
+- Back navigation button
+- Header section styling
+- Metric card displays
+- Two-column comparison layout
+- Panel card containers
+- Heatmap wrapper
+- Timeline control styling
+- Zone table formatting
+- Transcription display
+- Emotion tags and sentiment indicators
+- Action panel buttons
+
+**Used by:** Single Experiment page
+
+---
+
+### 11. **speech-to-text.css** (10 sections)
+Natural Language Processing analysis and transcription.
+
+**Includes:**
+- Content grid layout (sidebar + main)
+- Card and column stack styling
+- Color-themed icons
+- Scrollable transcript areas
+- Custom scrollbar styling
+- Action item formatting
+- Complex moment highlights
+- Emotion tags and badges
+- Question item styling
+- Transcript row formatting
+
+**Used by:** Speech-to-Text page
+
+---
+
+## CSS Organization System
+
+All CSS files follow a consistent section-based organization system for easy navigation:
+
+### Header Format
+```css
+/* ==================== Section Name ==================== */
+```
+
+### Section Examples
+Each file is divided into logical sections such as:
+- Layout & Grid
+- Typography
+- Cards
+- Forms
+- Buttons
+- Colors/Themes
+- Animations
+- Responsive
+
+This organization makes it easy to:
+- Find specific styles quickly
+- Understand the purpose of each section
+- Maintain consistent structure across files
+- Onboard new developers
+
+## Design System Guidelines
+
+### Spacing
+- Use consistent `gap` values: `0.5rem`, `1rem`, `1.5rem`, `2rem`
+- Padding follows the same scale: `0.75rem`, `1rem`, `1.5rem`, `2rem`
+
+### Border Radius
+- Small: `6px` - small components, tags
+- Medium: `10px`, `12px` - form inputs, buttons
+- Large: `16px`, `20px` - cards, main containers
+
+### Box Shadows
+- Light: `0 2px 8px rgba(0, 0, 0, 0.05)`
+- Medium: `0 4px 12px rgba(0, 0, 0, 0.08)`
+- Heavy: `0 10px 30px rgba(0, 0, 0, 0.12)`
+
+### Transitions
+- Standard: `all 0.3s ease`
+- Quick: `all 0.2s ease`
+- Smooth: `all 0.5s ease`
+
+## Best Practices
+
+### 1. **Use Base CSS for Shared Styles**
+Always apply shared styles from `base.css` before adding page-specific overrides.
+
+```html
+<link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+```
+
+### 2. **Follow Section Organization**
+When adding new styles, place them in the appropriate section or create a new one with the standard header format.
+
+### 3. **Color Consistency**
+Use the defined color palette for all colors to maintain visual consistency across the application.
+
+### 4. **Responsive Design**
+Always include mobile and tablet breakpoints:
+- Mobile: `max-width: 768px`
+- Tablet: `max-width: 992px`, `max-width: 1024px`
+- Desktop: `min-width: 1200px`
+
+### 5. **Avoid Redundant Comments**
+Use semantic class names and section headers instead of inline comments. The file organization is self-documenting.
+
+### 6. **Group Related Styles**
+Keep related styles (like button variants) in the same section rather than scattered throughout the file.
+
+
+## Getting Started
+
+### For New Developers
+
+1. **Start with `base.css`** to understand the foundational styling
+2. **Review the page-specific CSS** for features you're working on
+3. **Use the section headers** to navigate and find relevant styles
+4. **Follow the existing patterns** for consistency
+
+### Adding New Styles
+
+1. Determine if the style is global (base.css) or page-specific
+2. Find the appropriate section or create one
+3. Follow the existing naming conventions and formatting
+4. Update this README if adding new files or major sections
+
+## HTML Integration
+
+Include CSS files in your HTML templates in this order:
+
+```html
+<!-- Global Styles -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+
+<!-- Page-Specific Styles -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+```
+
+## Common Selectors
+
+### Card Components
+- `.card` - General card with shadow
+- `.overview-card` - Dashboard overview card of all experiments
+- `.experiment-card` - Experiment listing card
+
+### Buttons
+- `.btn-primary` - Primary action button
+- `.btn-secondary` - Secondary action button
+- `.btn-action` - Action button variant
+- `.btn-feature` - Feature call-to-action
+
+### Layout
+- `.container` - Main content wrapper
+- `.header-section` - Top header area
+- `.content-grid` - Grid layout container
+- `.column-stack` - Vertical stack layout
+
+### Status/Badge
+- `.status-badge` - Status indicator
+- `.card-badge` - Card badge
+- `.emotion-tag` - Sentiment/emotion tag
+- `.analysis-status-badge` - Analysis status badge
+
+## Troubleshooting
+
+### Styles Not Applying
+1. Check CSS file is linked in HTML
+2. Verify correct file name (case-sensitive on Linux/Mac)
+3. Clear browser cache (Ctrl+Shift+Delete)
+4. Check browser DevTools for specificity conflicts
+
+### Responsive Issues
+1. Add appropriate media query breakpoints
+2. Test on actual devices or use browser DevTools
+3. Check for fixed widths vs flexible layouts
+
+### Color Not Matching
+1. Verify hex code from color palette
+2. Check for opacity/transparency values
+3. Ensure correct state (normal, hover, active)
+
+## Resources
+
+- **Color Palette:** See "Base CSS - Global Styles" section above
+- **Spacing Scale:** Documented in "Design System Guidelines"
+- **Icons:** FontAwesome (check `images/` folder)
+- **Fonts:** System fonts (see Typography in base.css)
+---
+
+**Last Updated:** January 2026  
+**Maintained by:** Ayumi Chotoe

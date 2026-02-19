@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block title %}Manual Annotation{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/manual-annotation.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid pt-4">
+    <div class="header-section">
+        <div class="header-content">
+            <div class="dashboard-section">
+                <h1 class="dashboard-title">Manual Annotation</h1>
+                <p class="dashboard-subtitle">Review and assign person identities to tracked crops for ReID training</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Summary -->
+    <div class="summary-stats">
+        <div class="stat-box">
+            <div class="stat-number pending">{{ pending|length }}</div>
+            <div class="stat-label">Pending Jobs</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number in-progress">{{ in_progress|length }}</div>
+            <div class="stat-label">In Progress</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number completed">{{ completed|length }}</div>
+            <div class="stat-label">Completed</div>
+        </div>
+    </div>
+
+    <!-- In Progress Section -->
+    {% if in_progress %}
+    <div class="chart-card">
+        <div class="section-header">
+            <h3 class="section-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                Continue Labeling
+            </h3>
+            <span class="section-badge">{{ in_progress|length }}</span>
+        </div>
+        <div class="job-list">
+            {% for job in in_progress %}
+            <div class="job-card">
+                <div class="job-info">
+                    <div class="job-title-row">
+                        <h3 class="job-title" data-job-id="{{ job.job_id }}">{{ job.experiment_name or job.job_id }}</h3>
+                        <button class="edit-btn" onclick="startRename('{{ job.job_id }}', this)" title="Rename">✏️</button>
+                    </div>
+                    <div class="job-meta">
+                        <span>{{ job.groups|length }} groups</span>
+                        <span>Started {{ job.created_at[:10] }}</span>
+                    </div>
+                </div>
+                <div class="job-progress">
+                    <div class="progress-bar">
+                        {% set progress = ((job.labeled_groups|length) / (job.groups|length) * 100)|int if job.groups else 0 %}
+                        <div class="progress-fill" style="width: {{ progress }}%"></div>
+                    </div>
+                    <span class="progress-text">{{ progress }}%</span>
+                    <a href="{{ url_for('views.manual_annotation_job', job_id=job.job_id) }}" class="btn-action">Continue</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Pending Section -->
+    {% if pending %}
+    <div class="chart-card">
+        <div class="section-header">
+            <h3 class="section-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+                Pending Jobs
+            </h3>
+            <span class="section-badge">{{ pending|length }}</span>
+        </div>
+        <div class="job-list">
+            {% for job in pending %}
+            <div class="job-card">
+                <div class="job-info">
+                    <div class="job-title-row">
+                        <h3 class="job-title" data-job-id="{{ job.job_id }}">{{ job.experiment_name or job.job_id }}</h3>
+                        <button class="edit-btn" onclick="startRename('{{ job.job_id }}', this)" title="Rename">✏️</button>
+                    </div>
+                    <div class="job-meta">
+                        <span>{{ job.groups|length }} groups to label</span>
+                        <span>Created {{ job.created_at[:10] }}</span>
+                    </div>
+                </div>
+                <button onclick="openStartModal('{{ job.job_id }}')" class="btn-action">Start Labeling</button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Completed Section -->
+    {% if completed %}
+    <div class="chart-card">
+        <div class="section-header">
+            <h3 class="section-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                Completed
+            </h3>
+            <span class="section-badge">{{ completed|length }}</span>
+        </div>
+        <div class="job-list">
+            {% for job in completed %}
+            <div class="job-card">
+                <div class="job-info">
+                    <div class="job-title-row">
+                        <h3 class="job-title" data-job-id="{{ job.job_id }}">{{ job.experiment_name or job.job_id }}</h3>
+                        <button class="edit-btn" onclick="startRename('{{ job.job_id }}', this)" title="Rename">✏️</button>
+                    </div>
+                    <div class="job-meta">
+                        <span>{{ job.groups|length }} groups labeled</span>
+                        <span>Completed {{ job.completed_at[:10] if job.completed_at else 'N/A' }}</span>
+                    </div>
+                </div>
+                <span class="btn-done">✓ Done</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Empty State -->
+    {% if not pending and not in_progress and not completed %}
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-microscope"></i>
+        </div>
+        <p>No labeling jobs yet. Run video processing to create jobs.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Participant Count Modal -->
+<div id="participantModal" class="annotation-modal">
+    <div class="annotation-modal-content">
+        <h2>Setup Experiment</h2>
+        <div class="annotation-input-group">
+            <label>How many participants?</label>
+            <input type="number" id="participantCount" class="annotation-number-input" value="6" min="1" max="20">
+        </div>
+        <div class="annotation-modal-actions">
+            <button class="btn-action btn-secondary" onclick="closeModal()">Cancel</button>
+            <button class="btn-action" onclick="confirmStart()">Start Labeling</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedJobId = null;
+
+    // =====================
+    // PARTICIPANT MODAL
+    // =====================
+    function openStartModal(jobId) {
+        selectedJobId = jobId;
+        document.getElementById('participantModal').style.display = 'block';
+        setTimeout(() => document.getElementById('participantCount').focus(), 100);
+    }
+
+    function closeModal() {
+        document.getElementById('participantModal').style.display = 'none';
+        selectedJobId = null;
+    }
+
+    async function confirmStart() {
+        const count = document.getElementById('participantCount').value;
+        if(!count || count < 1) {
+            alert("Please enter a valid number (1-20)");
+            return;
+        }
+
+        const res = await fetch('{{ url_for("views.annotation_set_participants") }}', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                job_id: selectedJobId,
+                count: parseInt(count)
+            })
+        });
+
+        if(res.ok) {
+            window.location.href = `{{ url_for("views.manual_annotation_job", job_id="__JOB_ID__") }}`.replace('__JOB_ID__', selectedJobId);
+        } else {
+            alert("Error setting up job. Check console.");
+            console.error(await res.text());
+        }
+    }
+    
+    window.onclick = function(event) {
+        const modal = document.getElementById('participantModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+
+    // Handle Enter key in modal
+    document.getElementById('participantCount').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            confirmStart();
+        }
+    });
+
+    // =====================
+    // INLINE RENAMING
+    // =====================
+    function startRename(jobId, btn) {
+        const titleRow = btn.closest('.job-title-row');
+        const h3 = titleRow.querySelector('.job-title');
+        const currentName = h3.textContent;
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = currentName;
+        input.className = 'rename-input';
+        
+        h3.style.display = 'none';
+        btn.style.display = 'none';
+        titleRow.insertBefore(input, h3);
+        input.focus();
+        input.select();
+        
+        async function save() {
+            const newName = input.value.trim();
+            if (newName && newName !== currentName) {
+                const res = await fetch('{{ url_for("views.annotation_rename_job") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ job_id: jobId, name: newName })
+                });
+                
+                if (res.ok) {
+                    h3.textContent = newName;
+                } else {
+                    console.error('Rename failed:', await res.text());
+                    alert('Failed to save name');
+                }
+            }
+            input.remove();
+            h3.style.display = '';
+            btn.style.display = '';
+        }
+        
+        input.addEventListener('blur', save);
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') save();
+            if (e.key === 'Escape') {
+                input.remove();
+                h3.style.display = '';
+                btn.style.display = '';
+            }
+        });
+    }
+</script>
+{% endblock %}

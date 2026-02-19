@@ -3,422 +3,302 @@
 {% block title %}Help & Support{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/help.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid pt-4">
-    <div class="header">
-        <div>
-            <h1 class="header-title">Help & Support</h1>
-            <p class="header-subtitle">Everything you need to know about using the Taste Lab Dashboard</p>
+<div class="container-fluid py-4">
+    
+    <div class="header-section">
+        <div class="header-content">
+            <div class="dashboard-section">
+                <h1 class="dashboard-title">Help Center</h1>
+                <p class="dashboard-subtitle">Guides, workflows, and support for the TasteLab platform.</p>
+            </div>
+            
+            <div class="search-wrapper">
+                <i class="fas fa-search search-icon-inside"></i>
+                <input type="text" id="helpSearch" class="search-input" placeholder="Search (e.g. 'Sync', 'Labeling', 'Privacy')...">
+            </div>
         </div>
     </div>
-    <div class="main-card">
-        <!-- Quick Links -->
-        <div class="quick-links">
-            <a href="#getting-started" class="quick-link-card">
-                <div class="quick-link-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                    </svg>
-                </div>
-                <div class="quick-link-title">Getting Started</div>
-                <div class="quick-link-desc">Learn the basics and set up your first experiment</div>
-            </a>
+        
+    <div class="help-topic-grid">
+        <a href="#data-sync" class="topic-card orange">
+            <div class="topic-icon"><i class="fas fa-sync"></i></div>
+            <div class="topic-title">Data & Syncing</div>
+            <div class="topic-desc">How to retrieve video data from external storage.</div>
+        </a>
+        
+        <a href="#manual-annotation-guide" class="topic-card deep">
+            <div class="topic-icon"><i class="fas fa-tags"></i></div>
+            <div class="topic-title">Manual Annotation</div>
+            <div class="topic-desc">Vital steps for training the tracking model.</div>
+        </a>
+        
+        <a href="#analysis-results" class="topic-card light">
+            <div class="topic-icon"><i class="fas fa-chart-line"></i></div>
+            <div class="topic-title">Analysis & Results</div>
+            <div class="topic-desc">Interpreting heatmaps and sentiment graphs.</div>
+        </a>
+        
+        <a href="#troubleshooting" class="topic-card coral">
+            <div class="topic-icon"><i class="fas fa-life-ring"></i></div>
+            <div class="topic-title">FAQ & Support</div>
+            <div class="topic-desc">Common questions and processing delays.</div>
+        </a>
 
-            <a href="#navigation" class="quick-link-card">
-                <div class="quick-link-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
-                    </svg>
-                </div>
-                <div class="quick-link-title">Navigation Guide</div>
-                <div class="quick-link-desc">Understand the dashboard layout and features</div>
-            </a>
+        <a href="#legal-compliance" class="topic-card slate">
+            <div class="topic-icon"><i class="fas fa-scale-balanced"></i></div>
+            <div class="topic-title">Legal & Privacy</div>
+            <div class="topic-desc">Terms of Service and Privacy Policy information.</div>
+        </a>
+    </div>
 
-            <a href="#features" class="quick-link-card">
-                <div class="quick-link-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="9" y1="9" x2="15" y2="9"></line>
-                        <line x1="9" y1="15" x2="15" y2="15"></line>
-                    </svg>
-                </div>
-                <div class="quick-link-title">Key Features</div>
-                <div class="quick-link-desc">Explore all dashboard capabilities</div>
-            </a>
-
-            <a href="#troubleshooting" class="quick-link-card">
-                <div class="quick-link-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                    </svg>
-                </div>
-                <div class="quick-link-title">Troubleshooting</div>
-                <div class="quick-link-desc">Solutions to common issues</div>
-            </a>
+    <div id="data-sync" class="faq-section content-card">
+        <div class="section-header">
+            <i class="fas fa-database"></i>
+            <h2>Data Synchronization</h2>
         </div>
-
-        <!-- Getting Started -->
-        <div class="content-card" id="getting-started">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                    </svg>
-                    Getting Started
+        <div class="accordion" id="accordionSync">
+            <div class="accordion-item search-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#syncOne">
+                        Where is my data?
+                    </button>
                 </h2>
-            </div>
-
-            <div class="accordion help-accordion" id="gettingStartedAccordion">
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#step1">
-                            Step 1: Understanding Your Dashboard
-                        </button>
-                    </h2>
-                    <div id="step1" class="accordion-collapse collapse show" data-bs-parent="#gettingStartedAccordion">
-                        <div class="accordion-body">
-                            <p>The Taste Lab Dashboard serves as the central platform for managing sensory testing experiments. Here's what to know:</p>
-                            <ul>
-                                <li><strong>Dashboard:</strong> View the newest experiment data and quick statistics</li>
-                                <li><strong>Previous Experiments:</strong> Browse historical experiment data</li>
-                                <li><strong>Transcription:</strong> Upload and analyze experiment video recordings</li>
-                                <li><strong>Cameras:</strong> Monitor object detection and people tracking</li>
-                            </ul>
+                <div id="syncOne" class="accordion-collapse collapse" data-bs-parent="#accordionSync">
+                    <div class="accordion-body">
+                        <p>All video and sensor data is securely stored on an external platform (MinIO). The dashboard does not hold this data automatically.</p>
+                        <p>To view your latest experiments, you must <strong>retrieve</strong> the data:</p>
+                        <ol>
+                            <li>Locate the <strong>Sync Data</strong> button (usually found in the experiment overview <i class="fas fa-sync"></i>).</li>
+                            <li>Click the button once.</li>
+                            <li>The system will fetch new data from MinIO and populate the local database.</li>
+                        </ol>
+                        <div class="note-box">
+                            <i class="fas fa-info-circle"></i> <strong>Note:</strong> The system also performs an automatic sync every 24 hours. If you just finished an experiment, use the manual button to see it immediately.
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#step2">
-                            Step 2: Viewing Experiment Data
-                        </button>
-                    </h2>
-                    <div id="step2" class="accordion-collapse collapse" data-bs-parent="#gettingStartedAccordion">
-                        <div class="accordion-body">
-                            <p>To view data from a specific experiment:</p>
-                            <ol>
-                                <li>Navigate to the <strong>Dashboard</strong> or <strong>Previous Experiments</strong> page</li>
-                                <li>Use the <strong>experiment selector dropdown</strong> to choose an experiment</li>
-                                <li>The page will automatically load data including:
+    <div id="manual-annotation-guide" class="faq-section content-card">
+        <div class="section-header">
+            <i class="fas fa-user-tag"></i>
+            <h2>Manual Annotation User Guide</h2>
+        </div>
+        <div class="intro-text mb-4">
+            <p>If your experiment involves Computer Vision (Detection & Tracking), you <strong>must</strong> manually label participants before the system can generate heatmaps or movement data.</p>
+        </div>
+
+        <div class="accordion" id="accordionAnnotation">
+            <div class="accordion-item search-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#annoOne">
+                        Step-by-Step Labeling Guide
+                    </button>
+                </h2>
+                <div id="annoOne" class="accordion-collapse collapse show" data-bs-parent="#accordionAnnotation">
+                    <div class="accordion-body">
+                        <div class="step-list">
+                            <div class="step-item">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <strong>Start the Job</strong>
+                                    <p>Go to the Manual Annotation page. Find your experiment under "Pending Jobs" and click "Start Labeling".</p>
+                                </div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <strong>Set Participant Count (Critical)</strong>
+                                    <p>A popup will ask for the number of participants. You must enter the <strong>exact number</strong> of people who were in the room.</p>
+                                    <p class="text-danger small"><i class="fas fa-exclamation-triangle"></i> Incorrect counts will corrupt the tracking data.</p>
+                                </div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <strong>Assign Identities</strong>
+                                    <p>You will see a series of images (crops). Determine who the person is and assign them a number (e.g., Person 1, Person 2).</p>
                                     <ul>
-                                        <li>Participant statistics</li>
-                                        <li>Speech analysis and product mentions</li>
-                                        <li>Survey completion data</li>
-                                        <li>Time-based engagement metrics</li>
+                                        <li><strong>Consistency is key:</strong> The person you label as "Person 1" in the first image must be "Person 1" in all subsequent images.</li>
+                                        <li>Do not group different people into the same ID.</li>
                                     </ul>
-                                </li>
-                            </ol>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#step3">
-                            Step 3: Uploading Video for Transcription
-                        </button>
-                    </h2>
-                    <div id="step3" class="accordion-collapse collapse" data-bs-parent="#gettingStartedAccordion">
-                        <div class="accordion-body">
-                            <p>To analyze experiment recordings:</p>
-                            <ol>
-                                <li>Go to the <strong>Transcription</strong> page</li>
-                                <li>Click <strong>"Select Video File"</strong> or drag and drop an MP4 file</li>
-                                <li>Click <strong>"Process Video"</strong> to start analysis</li>
-                                <li>Wait for processing to complete (this may take several minutes)</li>
-                                <li>Review the results:
-                                    <ul>
-                                        <li>Video summary and key insights</li>
-                                        <li>Most mentioned topics and products</li>
-                                        <li>Full timestamped transcript</li>
-                                        <li>Keyword extraction</li>
-                                    </ul>
-                                </li>
-                            </ol>
-                            <p><strong>Supported format:</strong> MP4 files up to 500MB</p>
+                                </div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-number">4</div>
+                                <div class="step-content">
+                                    <strong>Training the Model</strong>
+                                    <p>Once you finish labeling, the data is sent to our processing pipeline (Dagster). The AI model will train on your inputs to learn who is who.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Navigation Guide -->
-        <div class="content-card" id="navigation">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
-                    </svg>
-                    Navigation Guide
+            <div class="accordion-item search-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#annoTwo">
+                        When will I see the results?
+                    </button>
                 </h2>
-            </div>
-
-            <div class="feature-list">
-                <div class="feature-item">
-                    <h4>Sidebar Navigation</h4>
-                    <p>Access all main pages from the left sidebar. The active page is highlighted in purple. Click any menu item to navigate instantly.</p>
-                </div>
-
-                <div class="feature-item">
-                    <h4>Search Bar</h4>
-                    <p>Use the search bar in the top navigation to quickly find experiments, participants, or specific data.</p>
-                </div>
-
-                <div class="feature-item">
-                    <h4>Experiment Selector</h4>
-                    <p>Most pages include an experiment selector dropdown at the top. Use this to switch between different experiments without changing pages.</p>
-                </div>
-
-                <div class="feature-item">
-                    <h4>Export Functions</h4>
-                    <p>Look for "Export Data" or "Download" buttons on various pages to save your data in CSV or PDF format for external analysis.</p>
-                </div>
-
-                <div class="feature-item">
-                    <h4>Breadcrumb Trail</h4>
-                    <p>Page titles and subtitles help you understand where you are in the dashboard. The gradient title indicates the current page.</p>
-                </div>
-
-                <div class="feature-item">
-                    <h4>Responsive Design</h4>
-                    <p>The dashboard works on desktop, tablet, and mobile devices. The sidebar collapses on smaller screens for easy access.</p>
+                <div id="annoTwo" class="accordion-collapse collapse" data-bs-parent="#accordionAnnotation">
+                    <div class="accordion-body">
+                        <p>After you finish manual labeling, the system needs time to process the video and generate the tracking paths.</p>
+                        <div class="alert-box warning">
+                            <i class="fas fa-clock"></i> <strong>Processing Time:</strong> This process typically takes up to 1/2 hours.
+                        </div>
+                        <p>Once the processing is complete, the data will be available in MinIO. You will need to click the <strong>Sync Data</strong> button again to pull the final tracking results into your dashboard.</p>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Key Features -->
-        <div class="content-card" id="features">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="9" y1="9" x2="15" y2="9"></line>
-                        <line x1="9" y1="15" x2="15" y2="15"></line>
-                    </svg>
-                    Key Features
+    <div id="analysis-results" class="faq-section content-card">
+        <div class="section-header">
+            <i class="fas fa-chart-area"></i>
+            <h2>Understanding Results</h2>
+        </div>
+        <div class="accordion" id="accordionAnalysis">
+            <div class="accordion-item search-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#analOne">
+                        How do I read the Heatmaps?
+                    </button>
                 </h2>
-            </div>
-
-            <div class="accordion help-accordion" id="featuresAccordion">
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#feature1">
-                            Experiment Dashboard
-                        </button>
-                    </h2>
-                    <div id="feature1" class="accordion-collapse collapse show" data-bs-parent="#featuresAccordion">
-                        <div class="accordion-body">
-                            <p>The main dashboard provides real-time insights into your current experiment:</p>
-                            <ul>
-                                <li><strong>Participant Overview:</strong> Track total participants, return visitors, and completion rates</li>
-                                <li><strong>Speech Analysis:</strong> View product mentions and keyword analysis from participant conversations</li>
-                                <li><strong>Visual Charts:</strong> Interactive graphs showing trends and comparisons</li>
-                                <li><strong>Quick Actions:</strong> Export data or compare experiments directly from the dashboard</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#feature2">
-                            Video Transcription & Analysis
-                        </button>
-                    </h2>
-                    <div id="feature2" class="accordion-collapse collapse" data-bs-parent="#featuresAccordion">
-                        <div class="accordion-body">
-                            <p>Automatically process experiment recordings to extract valuable insights:</p>
-                            <ul>
-                                <li><strong>Automatic Transcription:</strong> Convert speech to timestamped text</li>
-                                <li><strong>Topic Extraction:</strong> Identify most discussed topics and products</li>
-                                <li><strong>Keyword Analysis:</strong> Extract common terms and phrases</li>
-                                <li><strong>Summary Generation:</strong> Get AI-generated experiment summaries</li>
-                                <li><strong>Export Options:</strong> Download transcripts and summaries for reports</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#feature3">
-                            Object Detection & Tracking
-                        </button>
-                    </h2>
-                    <div id="feature3" class="accordion-collapse collapse" data-bs-parent="#featuresAccordion">
-                        <div class="accordion-body">
-                            <p>Monitor participant movement and lab utilization:</p>
-                            <ul>
-                                <li><strong>6-Camera Grid View:</strong> See all camera feeds simultaneously</li>
-                                <li><strong>Person Detection:</strong> Track people count and movement patterns</li>
-                                <li><strong>Heatmaps:</strong> Visualize high-traffic areas in the lab</li>
-                                <li><strong>Floor Plan View:</strong> See aggregated positions across all cameras</li>
-                                <li><strong>Detection Log:</strong> Review detailed detection history with confidence scores</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#feature4">
-                            Previous Experiments Browser
-                        </button>
-                    </h2>
-                    <div id="feature4" class="accordion-collapse collapse" data-bs-parent="#featuresAccordion">
-                        <div class="accordion-body">
-                            <p>Access and compare historical experiment data:</p>
-                            <ul>
-                                <li><strong>Filter by Category:</strong> Sort experiments by type (taste testing, texture analysis, etc.)</li>
-                                <li><strong>Status Tracking:</strong> See which experiments are completed, analyzing, or archived</li>
-                                <li><strong>Quick Stats:</strong> View key metrics for each experiment at a glance</li>
-                                <li><strong>Detailed Views:</strong> Click any experiment to see full results and analysis</li>
-                            </ul>
-                        </div>
+                <div id="analOne" class="accordion-collapse collapse" data-bs-parent="#accordionAnalysis">
+                    <div class="accordion-body">
+                        <p>The heatmap visualizes the density of movement in the room based on the manual labeling you performed.</p>
+                        <ul>
+                            <li><span style="color:#e53e3e; font-weight:bold;">Red Areas:</span> High traffic. Participants spent a lot of time here.</li>
+                            <li><span style="color:#38a169; font-weight:bold;">Green/Blue Areas:</span> Low traffic. Participants passed through quickly.</li>
+                        </ul>
+                        <p>Use the <strong>Timeline Slider</strong> at the bottom of the tracking page to replay the movement and see where people were at specific timestamps.</p>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Troubleshooting -->
-        <div class="content-card" id="troubleshooting">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                    </svg>
-                    Troubleshooting
+            <div class="accordion-item search-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#analTwo">
+                        Sentiment & Emotions
+                    </button>
                 </h2>
-            </div>
-
-            <div class="accordion help-accordion" id="troubleshootingAccordion">
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#issue1">
-                            Video Upload Fails or Hangs
-                        </button>
-                    </h2>
-                    <div id="issue1" class="accordion-collapse collapse show" data-bs-parent="#troubleshootingAccordion">
-                        <div class="accordion-body">
-                            <p><strong>Possible causes and solutions:</strong></p>
-                            <ul>
-                                <li><strong>File too large:</strong> Ensure your video is under 500MB. Compress the video if needed.</li>
-                                <li><strong>Wrong format:</strong> Only MP4 files are supported. Convert other formats before uploading.</li>
-                                <li><strong>Slow internet:</strong> Check your connection speed. Large files may take several minutes to upload.</li>
-                                <li><strong>Browser cache:</strong> Clear your browser cache and try again.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#issue2">
-                            Data Not Loading or Displaying
-                        </button>
-                    </h2>
-                    <div id="issue2" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
-                        <div class="accordion-body">
-                            <p><strong>Try these solutions:</strong></p>
-                            <ul>
-                                <li>Refresh the page using <span class="keyboard-shortcut">F5</span> or <span class="keyboard-shortcut">⌘R</span></li>
-                                <li>Check that the correct experiment is selected in the dropdown</li>
-                                <li>Verify your internet connection is stable</li>
-                                <li>Try logging out and logging back in</li>
-                                <li>Contact support if the issue persists</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#issue3">
-                            Charts Not Rendering Correctly
-                        </button>
-                    </h2>
-                    <div id="issue3" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
-                        <div class="accordion-body">
-                            <p><strong>Common fixes:</strong></p>
-                            <ul>
-                                <li>Ensure JavaScript is enabled in your browser</li>
-                                <li>Try using a different browser (Chrome, Firefox, Safari recommended)</li>
-                                <li>Update your browser to the latest version</li>
-                                <li>Disable browser extensions that might interfere with scripts</li>
-                                <li>Clear browser cache and reload the page</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#issue4">
-                            Export Function Not Working
-                        </button>
-                    </h2>
-                    <div id="issue4" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
-                        <div class="accordion-body">
-                            <p><strong>Solutions:</strong></p>
-                            <ul>
-                                <li>Check that pop-ups are not blocked by your browser</li>
-                                <li>Ensure you have sufficient storage space on your device</li>
-                                <li>Try downloading to a different location</li>
-                                <li>Verify you have permission to download files in your network</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#issue5">
-                            Camera Feed Not Showing
-                        </button>
-                    </h2>
-                    <div id="issue5" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
-                        <div class="accordion-body">
-                            <p><strong>Troubleshooting steps:</strong></p>
-                            <ul>
-                                <li>Ensure the selected experiment has camera data available</li>
-                                <li>Check that object detection processing has been completed</li>
-                                <li>Verify camera permissions are enabled</li>
-                                <li>Refresh the page and try again</li>
-                                <li>Contact technical support if cameras are offline</li>
-                            </ul>
-                        </div>
+                <div id="analTwo" class="accordion-collapse collapse" data-bs-parent="#accordionAnalysis">
+                    <div class="accordion-body">
+                        <p>If audio was recorded, the dashboard uses NLP (Natural Language Processing) to determine the emotional tone of the conversation.</p>
+                        <ul>
+                            <li><i class="fas fa-circle text-success"></i> <strong>Positive:</strong> Happy, Excited, Grateful.</li>
+                            <li><i class="fas fa-circle text-danger"></i> <strong>Negative:</strong> Angry, Disgusted, Worried.</li>
+                            <li><i class="fas fa-circle text-secondary"></i> <strong>Neutral:</strong> Standard conversation.</li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+    
+    <div id="legal-compliance" class="faq-section content-card">
+        <div class="section-header">
+            <i class="fas fa-scale-balanced"></i>
+            <h2>Legal & Compliance</h2>
+        </div>
+        <div class="legal-intro">
+            <p>TasteLab is committed to transparency and the protection of your data. Below you can access our detailed legal policies.</p>
+        </div>
+        
+        <div class="legal-grid">
+            <div class="legal-card">
+                <div class="legal-icon"><i class="fas fa-user-shield"></i></div>
+                <div class="legal-content">
+                    <h4>Privacy Policy</h4>
+                    <p>Learn how we collect, store, and process your personal information, including details on data retention and your rights under GDPR.</p>
+                    <a href="{{ url_for('views.privacy_policy') }}" class="btn-legal">View Privacy Policy <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+            
+            <div class="legal-card">
+                <div class="legal-icon"><i class="fas fa-file-contract"></i></div>
+                <div class="legal-content">
+                    <h4>Terms of Service</h4>
+                    <p>Review the agreement governing your use of TasteLab services, including acceptable use, intellectual property rights, and liability limitations.</p>
+                    <a href="{{ url_for('views.terms_of_service') }}" class="btn-legal">View Terms of Service <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="troubleshooting" class="support-footer">
+        <h3>Still having trouble?</h3>
+        <p>If data is not appearing after 24 hours, ensure you have clicked the "Sync" button. (<i class="fas fa-sync"></i>) </p>
     </div>
 </div>
-<br/><br/><br/>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Smooth scroll to sections
+    // Search Functionality
+    document.getElementById('helpSearch').addEventListener('keyup', function() {
+        let filter = this.value.toLowerCase();
+        let items = document.querySelectorAll('.search-item');
+        let cards = document.querySelectorAll('.content-card');
+
+        items.forEach(function(item) {
+            let text = item.textContent.toLowerCase();
+            if (text.includes(filter)) {
+                item.style.display = "";
+                // Auto-expand accordion if searching specific terms
+                if(filter.length > 2) {
+                    let collapseDiv = item.querySelector('.accordion-collapse');
+                    if(collapseDiv && !collapseDiv.classList.contains('show')) {
+                        new bootstrap.Collapse(collapseDiv, { toggle: true });
+                    }
+                }
+            } else {
+                item.style.display = "none";
+            }
+        });
+
+        // Hide empty sections
+        cards.forEach(card => {
+            let visibleItems = card.querySelectorAll('.search-item[style=""]');
+            
+            // Check if card has .legal-card items (Legal section has different structure)
+            let legalItems = card.querySelectorAll('.legal-card');
+            
+            // If it's a regular FAQ card
+            if (visibleItems.length > 0) {
+                 if (filter !== "" && visibleItems.length === 0) {
+                    card.style.display = "none";
+                } else {
+                    card.style.display = "block";
+                }
+            } 
+            // If it's the legal card, simple text search on the card text
+            else if (legalItems.length > 0) {
+                 let text = card.textContent.toLowerCase();
+                 if (text.includes(filter)) {
+                     card.style.display = "block";
+                 } else if (filter !== "") {
+                     card.style.display = "none";
+                 }
+            }
+        });
+    });
+
+    // Smooth scroll for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
             const target = document.querySelector(this.getAttribute('href'));
             if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         });
     });

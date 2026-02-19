@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block title %}Speech to Text Insights{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/speech-to-text.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid pt-4">
+    <div class="header-section">
+        <div class="header-content">
+            <div class="dashboard-section">
+                <h1 class="dashboard-title">Speech to Text Analysis</h1>
+                <p class="dashboard-subtitle">Detailed speech-to-text analysis from experiments</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="overview-card">
+        <div class="overview-bar">
+            <div class="overview-title-bar">
+                <i class="fas fa-filter"></i>
+                <h3>Select Experiment to View</h3>
+            </div>
+            <div class="overview-actions">
+                <form id="syncForm" method="POST" action="{{ url_for('views.manual_sync') }}" style="display: inline;">
+                    <button type="submit" class="btn-icon" title="Sync Data">
+                        <i class="fas fa-sync"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="overview-content">
+            <div class="experiment-dropdown" id="experimentSelect">
+                <div class="dropdown-selected">
+                    {% if selected_experiment %}
+                        {{ selected_experiment.title }} ({{ selected_experiment.date.strftime('%b %d, %Y') }})
+                    {% else %}
+                        Select Experiment
+                    {% endif %}
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="dropdown-options">
+                    {% if experiments %}
+                        {% for exp in experiments %}
+                        <div class="dropdown-option {% if selected_experiment and selected_experiment.id == exp.id %}active{% endif %}" 
+                            data-value="{{ exp.id }}">
+                            {{ exp.title }} ({{ exp.date.strftime('%b %d, %Y') }})
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="dropdown-option disabled">No experiments available</div>
+                    {% endif %}
+                </div>    
+            </div>
+        </div>
+    </div>
+
+    {% if nlp_analysis %}
+    
+    <div class="cards-grid mb-4">
+        <div class="small-card blue">
+            <div class="icon"><i class="fas fa-align-left"></i></div>
+            <div class="content">
+                <div class="label">Total Words</div>
+                <div class="value">{{ stats.word_count }}</div>
+            </div>
+        </div>
+
+        <div class="small-card mint">
+            <div class="icon"><i class="fas fa-book"></i></div>
+            <div class="content">
+                <div class="label">Vocabulary Size</div>
+                <div class="value">{{ stats.unique_words }}</div>
+            </div>
+        </div>
+
+        <div class="small-card orange">
+            <div class="icon"><i class="fas fa-check-double"></i></div>
+            <div class="content">
+                <div class="label">Action Items</div>
+                <div class="value">{{ action_items|length }}</div>
+            </div>
+        </div>
+
+        <div class="small-card purple">
+            <div class="icon"><i class="fa-solid fa-comment-dots"></i></div>
+            <div class="content">
+                <div class="label">Complexity Score</div>
+                <div class="value">{{ stats.complexity_score }}<span style="font-size:0.6em; opacity:0.7">/100</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nlp-card mb-4">
+        <h3 class="nlp-title"><i class="fas fa-magic text-primary"></i>AI Summary</h3>
+        {% if nlp_analysis.transcript_summary and nlp_analysis.transcript_summary.summary %}
+            <div class="highlight-box" style="background: #f8fafc; border-left-color: #718096; color: #4a5568;">
+                {{ nlp_analysis.transcript_summary.summary }}
+            </div>
+        {% else %}
+            <p class="highlight-box" style="background: #f8fafc; border-left-color: #718096; color: #4a5568;">
+                No summary available for this experiment.
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="content-grid">
+        
+        <div class="column-stack">
+            
+            <div class="nlp-card">
+                <h3 class="nlp-title"><i class="fas fa-tasks text-success"></i>Action Items</h3>
+                {% if action_items %}
+                    <div class="card-scroll-area" style="max-height: 280px;">
+                        {% for item in action_items %}
+                        <div class="action-item">
+                            <i class="fas fa-check-circle action-icon"></i>
+                            <div>{{ item }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-clipboard-check text-muted mb-2" style="font-size: 2rem; opacity: 0.3;"></i>
+                        <p class="text-muted small">No action items detected.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="nlp-card card-grow">
+                <h3 class="nlp-title"><i class="fas fa-lightbulb text-primary"></i>Highlights</h3>
+                <div class="card-scroll-area" style="max-height: 400px;">
+                    {% if highlights %}
+                        {% for sent in highlights %}
+                        <div class="highlight-box">
+                            <i class="fas fa-quote-left mr-2" style="opacity:0.6; margin-right:8px;"></i>
+                            {{ sent }}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted small">No highlights available.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="nlp-card">
+                <h3 class="nlp-title"><i class="fas fa-fingerprint text-purple"></i>Complex Moments</h3>
+                <div class="card-scroll-area" style="max-height: 250px;">
+                    {% if complex_segments %}
+                        {% for seg in complex_segments %}
+                        <div class="complex-item">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="complex-time">
+                                    {{ "%02d:%02d"|format((seg.start_time|int // 60), (seg.start_time|int % 60)) }}
+                                </span>
+                                <div>
+                                    {% for emotion in seg.emotions %}
+                                        <span class="emotion-tag">{{ emotion }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            {% if seg.text_snippet %}
+                            <div class="text-muted small fst-italic">
+                                {{ seg.text_snippet }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted small">No mixed-emotion segments found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="column-stack">
+            
+            <div class="nlp-card">
+                <h3 class="nlp-title"><i class="fas fa-question-circle text-warning"></i>Questions Asked</h3>
+                {% if questions %}
+                    <div class="card-scroll-area" style="max-height: 280px;">
+                        {% for q in questions %}
+                        <div class="question-item">
+                            <div class="d-flex gap-3">
+                                <div class="question-badge">?</div>
+                                <div>
+                                    <p class="mb-1 fw-bold text-dark" style="font-size: 0.95rem">{{ q.question_text }}</p>
+                                    <small class="text-muted">Confidence: {{ "%.0f"|format(q.confidence * 100) }}%</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mt-3">No specific questions detected in this session.</p>
+                {% endif %}
+            </div>
+
+            <div class="nlp-card card-grow">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="nlp-title m-0">Full Transcript</h3>
+                    <span class="badge bg-light text-dark border">{{ timeline|length }} Segments</span>
+                </div>
+                
+                <div class="transcript-scroll-area" style="max-height: 800px;">
+                    {% if timeline %}
+                        {% for segment in timeline %}
+                        <div class="transcript-row">
+                            <div class="transcript-time">
+                                {{ "%02d:%02d" | format((segment.start_time // 60)|int, (segment.start_time % 60)|int) }}
+                            </div>
+                            <div class="transcript-text">
+                                {{ segment.text_content }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5 text-muted">
+                            No transcript data available.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    {% else %}
+    <div class="text-center py-5">
+        <div style="background: #f1f5f9; width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+            <i class="fa-solid fa-microphone-slash" style="opacity: 0.3; font-size: 2.5rem;"></i>
+        </div>
+        <h3 style="color: #334155;">No Analysis Available</h3>
+        <p style="color: #64748b;">Please select an experiment with processed data to view the visualization.</p>
+    </div>
+    {% endif %}
+
+</div>
+
+<div class="loading-overlay" id="syncOverlay">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">Syncing with MinIO...</p>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Keep same experiment on page
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlExpId = urlParams.get('exp_id');
+        const storedExpId = localStorage.getItem('active_exp_id');
+
+        if (urlExpId) {
+            if (urlExpId !== storedExpId) {
+                localStorage.setItem('active_exp_id', urlExpId);
+            }
+        } 
+        else if (storedExpId) {
+            window.location.search = `?exp_id=${storedExpId}`;
+            return;
+        }
+
+        // Dropdown
+        const expDropdown = document.getElementById('experimentSelect');
+        
+        if (expDropdown) {
+            const selectedDiv = expDropdown.querySelector('.dropdown-selected');
+            
+            selectedDiv.addEventListener('click', (e) => {
+                e.stopPropagation();
+                expDropdown.classList.toggle('active');
+            });
+
+            document.addEventListener('click', () => {
+                expDropdown.classList.remove('active');
+            });
+
+            const options = expDropdown.querySelectorAll('.dropdown-option:not(.disabled)');
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    const expId = this.dataset.value;
+                    if (expId) {
+                        localStorage.setItem('active_exp_id', expId);
+                        window.location.href = `?exp_id=${expId}`;
+                    }
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

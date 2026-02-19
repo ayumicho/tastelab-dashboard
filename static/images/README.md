@@ -1,151 +1,65 @@
-# Images Directory
+# TasteLab Dashboard - Images Directory
 
-This directory contains all visual assets for the TasteLab Dashboard.
+This directory contains visual assets for the TasteLab Dashboard application.
 
-## Overview
-
-Images are organized into subdirectories by type and purpose for easy management and optimized loading. All images should be optimized for web use before being added to the repository.
-
-## File Structure
+## Directory Structure
 
 ```
 images/
-
+├── logo.png           # TasteLab Dashboard logo
+├── 400.png            # 400 Bad Request error page
+└── 500.png            # 500 Server Error page
 ```
 
-## Image Guidelines
+## Images
 
-**Usage in templates:**
+### Logo (`logo.png`)
+- **Usage:** Header navigation, branding
+- **Format:** PNG with transparency
+- **Usage in templates:**
 ```html
-<img src="{{ url_for('static', filename='images/icons/experiment.svg') }}" 
-     alt="Experiment" 
-     class="icon">
+<img src="{{ url_for('static', filename='images/logo.png') }}" 
+     alt="TasteLab Dashboard" 
+     class="logo">
 ```
 
-**Usage in CSS:**
-```css
-.icon-experiment {
-    background-image: url('../images/icons/experiment.svg');
-    width: 24px;
-    height: 24px;
-}
-```
+### Error Pages
 
-### Responsive Images
-
-Serve different sizes for different devices:
-
+**400 Error (`error-400.png`)**
+- **Purpose:** Display on HTTP 400 Bad Request errors
+- **Route:** Error handling page
+- **Usage in templates:**
 ```html
-<img 
-    src="{{ url_for('static', filename='images/hero-mobile.jpg') }}"
-    srcset="{{ url_for('static', filename='images/hero-mobile.jpg') }} 480w,
-            {{ url_for('static', filename='images/hero-tablet.jpg') }} 768w,
-            {{ url_for('static', filename='images/hero-desktop.jpg') }} 1200w"
-    sizes="(max-width: 480px) 480px,
-           (max-width: 768px) 768px,
-           1200px"
-    alt="Dashboard Hero">
+<img src="{{ url_for('static', filename='images/error-400.png') }}" 
+     alt="400 Bad Request">
 ```
 
-### Lazy Loading
-
-Load images only when visible:
-
+**500 Error (`500.png`)**
+- **Purpose:** Display on HTTP 500 Server Error
+- **Route:** Error handling page
+- **Usage in templates:**
 ```html
-<img 
-    src="{{ url_for('static', filename='images/placeholder.jpg') }}"
-    data-src="{{ url_for('static', filename='images/actual-image.jpg') }}"
-    alt="Experiment Result"
-    loading="lazy">
-```
-
-## Naming Conventions
-
-### File Naming Rules
-
-1. **Use lowercase** - `user-avatar.png` not `User-Avatar.png`
-2. **Use hyphens** - `hero-background.jpg` not `hero_background.jpg`
-3. **Be descriptive** - `experiment-chart-icon.svg` not `icon1.svg`
-4. **Include size if multiple** - `logo-small.png`, `logo-large.png`
-5. **Avoid spaces** - Use hyphens instead
-
-### Examples
-
-✅ **Good Names:**
-- `dashboard-hero-background.jpg`
-- `user-profile-placeholder.png`
-- `experiment-icon-24px.svg`
-- `success-illustration.svg`
-
-❌ **Bad Names:**
-- `IMG_1234.jpg`
-- `icon1.svg`
-- `background image.png`
-- `Screenshot 2025-09-15.png`
-
-## Accessibility
-
-### Alt Text
-
-Always provide descriptive alt text:
-
-```html
-<!-- Decorative images -->
-<img src="..." alt="">
-
-<!-- Functional images -->
-<img src="..." alt="Delete experiment">
-
-<!-- Informative images -->
-<img src="..." alt="Bar chart showing emotion analysis results">
-```
-
-**Background Images**
-```css
-/* Optimize background loading */
-.hero {
-    background-image: url('../images/placeholder.jpg');
-}
-
-.hero.loaded {
-    background-image: url('../images/hero-background.jpg');
-}
+<img src="{{ url_for('static', filename='images/error-500.png') }}" 
+     alt="500 Server Error">
 ```
 
 ## Adding New Images
 
-When adding new images:
+1. Optimize image file (compress, resize as needed)
+2. Add to this directory
+3. Use appropriate Flask URL helper:
+```python
+url_for('static', filename='images/filename.png')
+```
+4. Update this README
 
-1. **Optimize first** - Compress and resize
-2. **Choose correct format** - JPEG/PNG/SVG
-3. **Use descriptive name** - Follow naming conventions
-4. **Place in correct subdirectory**
-5. **Test responsiveness** - Check on multiple devices
-6. **Verify accessibility** - Add alt text
-7. **Update documentation** - Note in README if significant
+## Naming Convention
 
-## Troubleshooting
-
-### Image not displaying
-- Check file path is correct
-- Verify file exists in directory
-- Check file permissions
-- Clear browser cache
-- Inspect console for 404 errors
-
-### Image too large/slow
-- Compress image file
-- Reduce dimensions
-- Use appropriate format
-- Implement lazy loading
-- Consider using WebP
-
-### Blurry images
-- Use correct dimensions (not upscaled)
-- Provide 2x size for retina
-- Check compression quality
-- Verify image source quality
+- Use lowercase with hyphens: `logo.png`, `400.png`
+- Be descriptive: `500.png` not `error5.png`
+- No spaces in filenames
 
 ---
 
-**Last Updated:** December 2025
+**Last Updated:** January 2026
+**Maintained by:** Ayumi Chotoe
